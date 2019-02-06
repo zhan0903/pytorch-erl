@@ -218,7 +218,7 @@ class Agent:
             target_param.data.copy_(param.data)
 
     def add_experience(self, state, action, next_state, reward, done):
-        print("come")
+        # print("come")
         reward = utils.to_tensor(np.array([reward])).unsqueeze(0)
         if self.args.is_cuda: reward = reward.cuda()
         if self.args.use_done_mask:
