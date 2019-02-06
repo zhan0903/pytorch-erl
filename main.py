@@ -275,10 +275,11 @@ class Agent:
             p.start()
             processes.append(p)
 
-        print(replay_memory.get())
+        # print(replay_memory.get())
 
         for p in processes:
             p.join()
+            print(replay_memory.get())
 
         # print(replay_memory.get())
         print(len(self.replay_buffer))
