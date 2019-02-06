@@ -235,7 +235,6 @@ class Agent:
         state = utils.to_tensor(state).unsqueeze(0)
         if self.args.is_cuda: state = state.cuda()
         done = False
-
         while not done:
             if store_transition: self.num_frames += 1; self.gen_frames += 1
             if render and is_render: self.env.render()
@@ -253,7 +252,8 @@ class Agent:
             if store_transition: self.add_experience(state, action, next_state, reward, done)
             state = next_state
         if store_transition: self.num_games += 1
-        return total_reward
+        replay_memory.put(total_reward)
+        # return total_reward
 
     def train(self):
         # self.gen_frames = 0
