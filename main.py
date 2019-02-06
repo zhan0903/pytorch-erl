@@ -230,6 +230,7 @@ class Agent:
     def evaluate(self, net, replay_memory, is_render=False, is_action_noise=False, store_transition=True):
         total_reward = 0.0
         replay_memory.put("hi")
+        print("hello world")
         state = self.env.reset()
         state = utils.to_tensor(state).unsqueeze(0)
         if self.args.is_cuda: state = state.cuda()
@@ -260,6 +261,7 @@ class Agent:
         # get_num_ids = [worker.set_gen_frames.remote(0) for worker in self.workers]
         replay_memory = mp.Queue()
         processes = []
+        # with time_start
         for pop in self.pop:
             pop.share_memory()
             p = mp.Process(target=self.evaluate, args=(pop, replay_memory))
