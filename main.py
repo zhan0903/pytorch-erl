@@ -259,7 +259,7 @@ class Agent:
         # self.gen_frames = 0
         print("begin training")
         # get_num_ids = [worker.set_gen_frames.remote(0) for worker in self.workers]
-        replay_memory = mp.Queue()
+        replay_memory = mp.Queue(20)
         processes = []
         # with time_start
         for pop in self.pop:
