@@ -253,6 +253,7 @@ class Agent:
             state = next_state
         if store_transition: self.num_games += 1
         replay_memory.put(total_reward)
+        print(total_reward)
         # return total_reward
 
     def train(self):
