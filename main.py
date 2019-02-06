@@ -263,6 +263,9 @@ class Agent:
         replay_memory = mp.Queue(20)
         processes = []
         # with time_start
+
+        print(len(self.replay_buffer))
+
         for pop in self.pop:
             pop.share_memory()
             p = mp.Process(target=self.evaluate, args=(pop, replay_memory))
@@ -275,6 +278,7 @@ class Agent:
             p.join()
 
         # print(replay_memory.get())
+        print(len(self.replay_buffer))
 
         exit(0)
 
