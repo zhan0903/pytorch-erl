@@ -255,7 +255,7 @@ class Agent:
             state = next_state
         if store_transition: self.num_games += 1
         replay_memory.put(total_reward)
-        print(total_reward)
+        # print(total_reward)
         print(len(self.replay_buffer))
         # return total_reward
 
