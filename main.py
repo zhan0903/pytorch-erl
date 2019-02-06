@@ -218,6 +218,7 @@ class Agent:
             target_param.data.copy_(param.data)
 
     def add_experience(self, state, action, next_state, reward, done):
+        print("come")
         reward = utils.to_tensor(np.array([reward])).unsqueeze(0)
         if self.args.is_cuda: reward = reward.cuda()
         if self.args.use_done_mask:
@@ -230,8 +231,9 @@ class Agent:
     def evaluate(self, net, replay_memory, is_render=False, is_action_noise=False, store_transition=True):
         total_reward = 0.0
         # replay_memory.put("hi")
-        print("hello world")
+        # print("hello world")
         state = self.env.reset()
+        print(len(self.replay_buffer))
         state = utils.to_tensor(state).unsqueeze(0)
         if self.args.is_cuda: state = state.cuda()
         done = False
@@ -254,6 +256,7 @@ class Agent:
         if store_transition: self.num_games += 1
         replay_memory.put(total_reward)
         print(total_reward)
+        print(len(self.replay_buffer))
         # return total_reward
 
     def train(self):
