@@ -230,8 +230,6 @@ class Agent:
 
     def evaluate(self, net, replay_memory, is_render=False, is_action_noise=False, store_transition=True):
         total_reward = 0.0
-        # replay_memory.put("hi")
-        # print("hello world")
         state = self.env.reset()
         print(len(self.replay_buffer))
         state = utils.to_tensor(state).unsqueeze(0)
@@ -265,6 +263,8 @@ class Agent:
         # get_num_ids = [worker.set_gen_frames.remote(0) for worker in self.workers]
         replay_memory = mp.Queue(20)
         processes = []
+        results = []
+
         # with time_start
 
         print(len(self.replay_buffer))
@@ -279,7 +279,9 @@ class Agent:
 
         for p in processes:
             p.join()
-            print(replay_memory.get())
+            results.append(replay_memory.get())
+
+        print(results)
 
         # print(replay_memory.get())
         print(len(self.replay_buffer))
@@ -337,8 +339,7 @@ class Agent:
         # gen_frames = 0; num_games = 0; len_replay = 0;num_frames = 0
         sum_results = np.sum(results_ea, axis=0)
         # test = sum(results_ea)
-        # fitness / num_evals, len(relay_buff), self.num_frames, self.gen_frames, self.num_games
-
+        # fitness / num_evals, len(relay_buff), self.num_frames, self.gen_frames, self.num_game
         # logger.debug("test:{0},results_ea:{1}".format(sum_results, results_ea))
 
         self.len_replay = sum_results[1]
