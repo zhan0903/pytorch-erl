@@ -253,7 +253,7 @@ class Agent:
                 self.add_experience(state, action, next_state, reward, done, experiences)
 
             print(len(experiences))
-            time.sleep(1)
+            time.sleep(2)
 
             state = next_state
         if store_transition: self.num_games += 1
