@@ -230,7 +230,7 @@ class Agent:
     def evaluate(self, net, key, replay_memory, is_render=False, is_action_noise=False, store_transition=True):
         total_reward = 0.0
         state = self.env.reset()
-        print(len(self.replay_buffer))
+        # print(len(self.replay_buffer))
         state = utils.to_tensor(state).unsqueeze(0)
         if self.args.is_cuda: state = state.cuda()
         done = False
@@ -254,34 +254,31 @@ class Agent:
         # replay_memory.put(total_reward)
         replay_memory[key] = self.replay_buffer
         # print(total_reward)
-        print(len(self.replay_buffer))
+        # print(len(self.replay_buffer))
         # return total_reward
 
     def train(self):
-        # self.gen_frames = 0
         print("begin training")
-        # get_num_ids = [worker.set_gen_frames.remote(0) for worker in self.workers]
         replay_memory = mp.Queue()
         processes = []
-        results = []
         # with mp.Manager() as manager:
         d = mp.Manager().dict()
+        print(len(d))
+        learner = LearnerThread(d)
+        learner.start()
 
-        print(len(self.replay_buffer))
         for key, pop in enumerate(self.pop):
             pop.share_memory()
             p = mp.Process(target=self.evaluate, args=(pop, key, d))
             p.start()
             processes.append(p)
 
-        # print(replay_memory.get())
-
         for p in processes:
             p.join()
             # results.append(replay_memory.get())
 
         print(d)
-        print(len(self.replay_buffer))
+        # print(len(self.replay_buffer))
 
         exit(0)
 
@@ -375,7 +372,7 @@ class LearnerThread(threading.Thread):
     addition, moving heavyweight gradient ops session runs off the main thread
     improves overall throughput.
     """
-    def __init__(self, local_evaluator, ddpg):
+    def __init__(self, replay_memory):
         threading.Thread.__init__(self)
         self.learner_queue_size = WindowStat("size", 50)
         self.local_evaluator = local_evaluator
@@ -387,12 +384,20 @@ class LearnerThread(threading.Thread):
         self.weights_updated = False
         self.stopped = False
         self.stats = {}
+        self.replay_memory = replay_memory
 
     def run(self):
         while not self.stopped:
             self.step()
 
     def step(self):
+        if len(self.replay_memory) is not 0:
+            print("begin background training")
+            time.sleep(2)
+        else:
+            print("none")
+            return
+
         with self.queue_timer:
             ra, replay = self.inqueue.get()
         if replay is not None:
