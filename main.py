@@ -416,22 +416,22 @@ class LearnerThread(threading.Thread):
             time.sleep(1)
             return
 
-        with self.queue_timer:
-            ra, replay = self.inqueue.get()
-        if replay is not None:
-            batch = replay.Transition(*zip(*transitions))
-            prio_dict = {}
-            with self.grad_timer:
-                grad_out = self.local_evaluator.compute_apply(replay)
-                for pid, info in grad_out.items():
-                    prio_dict[pid] = (
-                        replay.policy_batches[pid].data.get("batch_indexes"),
-                        info.get("td_error"))
-                    if "stats" in info:
-                        self.stats[pid] = info["stats"]
-            self.outqueue.put((ra, prio_dict, replay.count))
-        self.learner_queue_size.push(self.inqueue.qsize())
-        self.weights_updated = True
+        # with self.queue_timer:
+        #     ra, replay = self.inqueue.get()
+        # if replay is not None:
+        #     batch = replay.Transition(*zip(*transitions))
+        #     prio_dict = {}
+        #     with self.grad_timer:
+        #         grad_out = self.local_evaluator.compute_apply(replay)
+        #         for pid, info in grad_out.items():
+        #             prio_dict[pid] = (
+        #                 replay.policy_batches[pid].data.get("batch_indexes"),
+        #                 info.get("td_error"))
+        #             if "stats" in info:
+        #                 self.stats[pid] = info["stats"]
+        #     self.outqueue.put((ra, prio_dict, replay.count))
+        # self.learner_queue_size.push(self.inqueue.qsize())
+        # self.weights_updated = True
 
 
 if __name__ == "__main__":
