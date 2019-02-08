@@ -285,7 +285,7 @@ class Agent:
 
         print(d)
         print(len(q))
-        print(q[0])
+        # print(q[0])
         # print(len(q))
         # print(len(self.replay_buffer))
         exit(0)
