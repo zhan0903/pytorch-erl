@@ -252,6 +252,8 @@ class Agent:
             if store_transition:
                 self.add_experience(state, action, next_state, reward, done, experiences)
 
+            print(len(experiences))
+
             state = next_state
         if store_transition: self.num_games += 1
         # replay_memory.put(total_reward)
@@ -283,7 +285,7 @@ class Agent:
             p.join()
             # results.append(replay_memory.get())
 
-        print(d)
+        print(len(d))
         print(len(q))
         # print(q[0])
         # print(len(q))
