@@ -284,7 +284,8 @@ class Agent:
             # results.append(replay_memory.get())
 
         print(d)
-        print(q)
+        print(len(q))
+        print(q[0])
         # print(len(q))
         # print(len(self.replay_buffer))
         exit(0)
