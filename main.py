@@ -269,7 +269,7 @@ class Agent:
         q = mp.Manager().Queue()
 
         print(len(d))
-        print(len(q))
+        print(q.qsize())
         learner = LearnerThread(d, q)
         learner.start()
 
@@ -284,6 +284,8 @@ class Agent:
             # results.append(replay_memory.get())
 
         print(d)
+        print(q)
+        # print(len(q))
         # print(len(self.replay_buffer))
 
         exit(0)
@@ -398,6 +400,14 @@ class LearnerThread(threading.Thread):
             self.step()
 
     def step(self):
+        if not self.experiences_queue.empty():
+            print("begin background training")
+            time.sleep(1)
+        else:
+            print("none")
+            time.sleep(1)
+            return
+
         if len(self.replay_memory) is not 0:
             print("begin background training")
             time.sleep(1)
