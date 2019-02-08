@@ -374,10 +374,10 @@ class LearnerThread(threading.Thread):
     """
     def __init__(self, replay_memory):
         threading.Thread.__init__(self)
-        self.learner_queue_size = WindowStat("size", 50)
-        self.local_evaluator = local_evaluator
-        self.inqueue = queue.Queue(maxsize=LEARNER_QUEUE_MAX_SIZE)
-        self.outqueue = queue.Queue()
+        # self.learner_queue_size = WindowStat("size", 50)
+        # self.local_evaluator = local_evaluator
+        # self.inqueue = queue.Queue(maxsize=LEARNER_QUEUE_MAX_SIZE)
+        # self.outqueue = queue.Queue()
         self.queue_timer = TimerStat()
         self.grad_timer = TimerStat()
         self.daemon = True
