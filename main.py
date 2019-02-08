@@ -217,7 +217,7 @@ class Agent:
         for target_param, param in zip(evo_net.parameters(), rl_net.parameters()):
             target_param.data.copy_(param.data)
 
-    def add_experience(self, state, action, next_state, reward, done, experiences_queue):
+    def add_experience(self, state, action, next_state, reward, done, experiences):
         reward = utils.to_tensor(np.array([reward])).unsqueeze(0)
         if self.args.is_cuda: reward = reward.cuda()
         if self.args.use_done_mask:
@@ -225,10 +225,10 @@ class Agent:
             if self.args.is_cuda: done = done.cuda()
         action = utils.to_tensor(action)
         if self.args.is_cuda: action = action.cuda()
-        experiences_queue.put((state, action, next_state, reward, done))
+        experiences.append((state, action, next_state, reward, done))
         self.replay_buffer.push(state, action, next_state, reward, done)
 
-    def evaluate(self, net, key, replay_memory, experiences_queue, is_render=False, is_action_noise=False, store_transition=True):
+    def evaluate(self, net, key, replay_memory, experiences, is_render=False, is_action_noise=False, store_transition=True):
         total_reward = 0.0
         state = self.env.reset()
         # print(len(self.replay_buffer))
@@ -250,7 +250,7 @@ class Agent:
             total_reward += reward
 
             if store_transition:
-                self.add_experience(state, action, next_state, reward, done, experiences_queue)
+                self.add_experience(state, action, next_state, reward, done, experiences)
 
             state = next_state
         if store_transition: self.num_games += 1
@@ -266,10 +266,10 @@ class Agent:
         processes = []
         # with mp.Manager() as manager:
         d = mp.Manager().dict()
-        q = mp.Manager().Queue()
+        q = mp.Manager().list()
 
         print(len(d))
-        print(q.qsize())
+        print(len(q))
         learner = LearnerThread(d, q)
         learner.start()
 
@@ -287,7 +287,6 @@ class Agent:
         print(q)
         # print(len(q))
         # print(len(self.replay_buffer))
-
         exit(0)
 
         # for worker in self.workers: worker.set_gen_frames.remote(0)
@@ -400,13 +399,13 @@ class LearnerThread(threading.Thread):
             self.step()
 
     def step(self):
-        if not self.experiences_queue.empty():
-            print("begin background training")
-            time.sleep(1)
-        else:
-            print("none")
-            time.sleep(1)
-            return
+        # if not self.experiences_queue.empty():
+        #     print("begin background training")
+        #     time.sleep(1)
+        # else:
+        #     print("none")
+        #     time.sleep(1)
+        #     return
 
         if len(self.replay_memory) is not 0:
             print("begin background training")
