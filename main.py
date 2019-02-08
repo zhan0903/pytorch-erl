@@ -218,7 +218,6 @@ class Agent:
             target_param.data.copy_(param.data)
 
     def add_experience(self, state, action, next_state, reward, done):
-        # print("come")
         reward = utils.to_tensor(np.array([reward])).unsqueeze(0)
         if self.args.is_cuda: reward = reward.cuda()
         if self.args.use_done_mask:
@@ -228,7 +227,7 @@ class Agent:
         if self.args.is_cuda: action = action.cuda()
         self.replay_buffer.push(state, action, next_state, reward, done)
 
-    def evaluate(self, net, replay_memory, is_render=False, is_action_noise=False, store_transition=True):
+    def evaluate(self, net, key, replay_memory, is_render=False, is_action_noise=False, store_transition=True):
         total_reward = 0.0
         state = self.env.reset()
         print(len(self.replay_buffer))
@@ -252,7 +251,8 @@ class Agent:
             if store_transition: self.add_experience(state, action, next_state, reward, done)
             state = next_state
         if store_transition: self.num_games += 1
-        replay_memory.put(total_reward)
+        # replay_memory.put(total_reward)
+        replay_memory[key] = self.replay_buffer
         # print(total_reward)
         print(len(self.replay_buffer))
         # return total_reward
@@ -261,17 +261,16 @@ class Agent:
         # self.gen_frames = 0
         print("begin training")
         # get_num_ids = [worker.set_gen_frames.remote(0) for worker in self.workers]
-        replay_memory = mp.Queue(20)
+        replay_memory = mp.Queue()
         processes = []
         results = []
-
-        # with time_start
+        # with mp.Manager() as manager:
+        d = mp.Manager().dict()
 
         print(len(self.replay_buffer))
-
-        for pop in self.pop:
+        for key, pop in enumerate(self.pop):
             pop.share_memory()
-            p = mp.Process(target=self.evaluate, args=(pop, replay_memory))
+            p = mp.Process(target=self.evaluate, args=(pop, key, d))
             p.start()
             processes.append(p)
 
@@ -279,11 +278,9 @@ class Agent:
 
         for p in processes:
             p.join()
-            results.append(replay_memory.get())
+            # results.append(replay_memory.get())
 
-        print(results)
-
-        # print(replay_memory.get())
+        print(d)
         print(len(self.replay_buffer))
 
         exit(0)
