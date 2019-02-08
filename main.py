@@ -217,7 +217,7 @@ class Agent:
         for target_param, param in zip(evo_net.parameters(), rl_net.parameters()):
             target_param.data.copy_(param.data)
 
-    def add_experience(self, state, action, next_state, reward, done):
+    def add_experience(self, state, action, next_state, reward, done, experiences_queue):
         reward = utils.to_tensor(np.array([reward])).unsqueeze(0)
         if self.args.is_cuda: reward = reward.cuda()
         if self.args.use_done_mask:
@@ -225,9 +225,10 @@ class Agent:
             if self.args.is_cuda: done = done.cuda()
         action = utils.to_tensor(action)
         if self.args.is_cuda: action = action.cuda()
+        experiences_queue.put(state, action, next_state, reward, done)
         self.replay_buffer.push(state, action, next_state, reward, done)
 
-    def evaluate(self, net, key, replay_memory, is_render=False, is_action_noise=False, store_transition=True):
+    def evaluate(self, net, key, replay_memory, experiences_queue, is_render=False, is_action_noise=False, store_transition=True):
         total_reward = 0.0
         state = self.env.reset()
         # print(len(self.replay_buffer))
@@ -248,7 +249,9 @@ class Agent:
                 next_state = next_state.cuda()
             total_reward += reward
 
-            if store_transition: self.add_experience(state, action, next_state, reward, done)
+            if store_transition:
+                self.add_experience(state, action, next_state, reward, done,experiences_queue)
+
             state = next_state
         if store_transition: self.num_games += 1
         # replay_memory.put(total_reward)
@@ -263,13 +266,16 @@ class Agent:
         processes = []
         # with mp.Manager() as manager:
         d = mp.Manager().dict()
+        q = mp.Manager().Queue()
+
         print(len(d))
-        learner = LearnerThread(d)
+        print(len(q))
+        learner = LearnerThread(d, q)
         learner.start()
 
         for key, pop in enumerate(self.pop):
             pop.share_memory()
-            p = mp.Process(target=self.evaluate, args=(pop, key, d))
+            p = mp.Process(target=self.evaluate, args=(pop, key, d, q))
             p.start()
             processes.append(p)
 
@@ -372,7 +378,7 @@ class LearnerThread(threading.Thread):
     addition, moving heavyweight gradient ops session runs off the main thread
     improves overall throughput.
     """
-    def __init__(self, replay_memory):
+    def __init__(self, replay_memory, experiences_queue):
         threading.Thread.__init__(self)
         # self.learner_queue_size = WindowStat("size", 50)
         # self.local_evaluator = local_evaluator
@@ -385,6 +391,7 @@ class LearnerThread(threading.Thread):
         self.stopped = False
         self.stats = {}
         self.replay_memory = replay_memory
+        self.experiences_queue = experiences_queue
 
     def run(self):
         while not self.stopped:
@@ -393,9 +400,10 @@ class LearnerThread(threading.Thread):
     def step(self):
         if len(self.replay_memory) is not 0:
             print("begin background training")
-            time.sleep(2)
+            time.sleep(1)
         else:
             print("none")
+            time.sleep(1)
             return
 
         with self.queue_timer:
