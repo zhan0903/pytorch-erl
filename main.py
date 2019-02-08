@@ -225,8 +225,8 @@ class Agent:
             if self.args.is_cuda: done = done.cuda()
         action = utils.to_tensor(action)
         if self.args.is_cuda: action = action.cuda()
-        experiences_queue.put(state, action, next_state, reward, done)
-        self.replay_buffer.push((state, action, next_state, reward, done))
+        experiences_queue.put((state, action, next_state, reward, done))
+        self.replay_buffer.push(state, action, next_state, reward, done)
 
     def evaluate(self, net, key, replay_memory, experiences_queue, is_render=False, is_action_noise=False, store_transition=True):
         total_reward = 0.0
