@@ -352,7 +352,7 @@ class LearnerThread(threading.Thread):
         if not self.replay_queue.empty():
             print("begin background training")
             print("self.replay_queue.qsize", self.replay_queue.qsize())
-            print(self.replay_queue)
+            print(self.replay_queue.get())
             time.sleep(1)
         else:
             print("none")
