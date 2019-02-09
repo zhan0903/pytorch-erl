@@ -47,7 +47,7 @@ class Parameters:
         self.use_ln = True  # True
         self.gamma = 0.99; self.tau = 0.001
         self.seed = 7
-        self.batch_size = 10 # 128
+        self.batch_size = 128 # 128
         self.buffer_size = 1000000
         self.frac_frames_train = 1.0
         self.use_done_mask = True
@@ -131,7 +131,7 @@ class Agent:
     def __init__(self, args, env):
         self.args = args; self.env = env
         self.evolver = utils_ne.SSNE(self.args)
-        self.replay_buffer = replay_memory.ReplayMemory(args.buffer_size)
+        # self.replay_buffer = replay_memory.ReplayMemory(args.buffer_size)
         self.pop = []
         for _ in range(args.pop_size):
             self.pop.append(ddpg.Actor(args))
@@ -142,9 +142,11 @@ class Agent:
         # args.is_cuda = True; args.is_memory_cuda = True
         self.rl_agent = ddpg.DDPG(args)
         self.ounoise = ddpg.OUNoise(args.action_dim)
-        # self.learner = LearnerThread()
-        # self.learner.start()
-        # self.learning_started = False
+        self.replay_queue = mp.Queue()
+
+        learner = LearnerThread(self.replay_queue, self.rl_agent)
+        learner.start()
+
 
         # Stats
         self.timers = {
@@ -329,7 +331,7 @@ class LearnerThread(threading.Thread):
     addition, moving heavyweight gradient ops session runs off the main thread
     improves overall throughput.
     """
-    def __init__(self,replay_queue):
+    def __init__(self, replay_queue, rl_agent):
         threading.Thread.__init__(self)
         # self.learner_queue_size = WindowStat("size", 50)
         # self.local_evaluator = local_evaluator
@@ -343,6 +345,7 @@ class LearnerThread(threading.Thread):
         self.stats = {}
         self.replay_memory = replay_memory
         self.replay_queue = replay_queue
+        self.rl_agent = rl_agent
 
     def run(self):
         while not self.stopped:
@@ -353,7 +356,10 @@ class LearnerThread(threading.Thread):
             print("begin background training")
             print("self.replay_queue.qsize", self.replay_queue.qsize())
             print(self.replay_queue.get())
+            print("self.replay_queue.qsize", self.replay_queue.qsize())
             time.sleep(1)
+            # batch = self.replay_queue.get()
+            # self.rl_agent.update_parameters(batch)
         else:
             print("none")
             time.sleep(1)
