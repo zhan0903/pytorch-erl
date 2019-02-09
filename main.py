@@ -114,13 +114,13 @@ def evaluate(net, env, args, replay_queue, store_transition=True):
         if store_transition:
             add_experience(state, action, next_state, reward, done, replay_buffer, replay_queue, args)
 
-        if len(replay_buffer) > args.batch_size/10:
-            transitions = replay_buffer.sample(args.batch_size/10)
+        if len(replay_buffer) > args.batch_size:
+            transitions = replay_buffer.sample(args.batch_size)
             batch = replay_memory.Transition(*zip(*transitions))
             replay_queue.put(batch)
 
         print(len(replay_buffer))
-        time.sleep(1)
+        # time.sleep(1)
         state = next_state
     # if store_transition: self.num_games += 1
     # replay_memory.put(total_reward)
