@@ -358,13 +358,13 @@ class LearnerThread(threading.Thread):
             time.sleep(1)
             return
 
-        if len(self.replay_memory) is not 0:
-            print("begin background training")
-            time.sleep(1)
-        else:
-            print("none")
-            time.sleep(1)
-            return
+        # if len(self.replay_memory) is not 0:
+        #     print("begin background training")
+        #     time.sleep(1)
+        # else:
+        #     print("none")
+        #     time.sleep(1)
+        #     return
 
         # with self.queue_timer:
         #     ra, replay = self.inqueue.get()
