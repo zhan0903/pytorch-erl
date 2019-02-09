@@ -211,7 +211,7 @@ class Agent:
 
     def train(self):
         print("begin training")
-        replay_queue = mp.Queue()
+        replay_queue = mp.SimpleQueue()
         processes = []
         # with mp.Manager() as manager:
         d = mp.Manager().dict()
