@@ -213,7 +213,7 @@ class Agent:
 
     def train(self):
         print("begin training")
-        replay_queue = mp.Queue()
+        # replay_queue = mp.Queue()
         processes = []
         # with mp.Manager() as manager:
         d = mp.Manager().dict()
@@ -226,7 +226,7 @@ class Agent:
 
         for key, pop in enumerate(self.pop):
             pop.share_memory()
-            p = mp.Process(target=evaluate, args=(pop, self.env, self.args, replay_queue))
+            p = mp.Process(target=evaluate, args=(pop, self.env, self.args, self.replay_queue))
             p.start()
             processes.append(p)
 
@@ -343,7 +343,7 @@ class LearnerThread(threading.Thread):
         self.weights_updated = False
         self.stopped = False
         self.stats = {}
-        self.replay_memory = replay_memory
+        # self.replay_memory = replay_memory
         self.replay_queue = replay_queue
         self.rl_agent = rl_agent
 
