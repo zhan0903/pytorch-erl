@@ -75,111 +75,6 @@ class Parameters:
 original = False
 
 
-@ray.remote(num_gpus=0.1)
-class Worker(object):
-    def __init__(self, args):
-        # self.env = env_creator(config["env_config"]) # Initialize environment.
-        # self.policy = ddpg.Actor(args)
-        self.env = utils.NormalizedActions(gym.make(env_tag))
-        self.args = args
-        # self.args.is_cuda = True
-        self.evolver = utils_ne.SSNE(self.args)
-        # self.replay_buffer = replay_buff
-
-        # init rl agent
-        # self.rl_agent = ddpg.DDPG(args)
-        self.ounoise = ddpg.OUNoise(args.action_dim)
-        # self.policy.eval()
-        self.replay_buffer = replay_memory.ReplayMemory(args.buffer_size//args.pop_size)
-
-        # init ea pop
-        # self.pop = dict([(key, ddpg.Actor(args))for key in range(args.pop_size)])
-        # for i in range(args.pop_size):
-        #     self.pop[i].eval()
-
-        self.num_games = 0; self.num_frames = 0; self.gen_frames = 0
-        # Details omitted.
-
-    def set_gen_frames(self, value):
-        self.gen_frames = value
-        return self.gen_frames
-
-    def get_gen_num(self):
-        return self.gen_frames
-
-    def ddpg_learning(self, worst_index):
-        # DDPG learning step
-        if len(self.replay_buffer) > self.args.batch_size * 5:
-            for _ in range(int(self.gen_frames * self.args.frac_frames_train)):
-                transitions = self.replay_buffer.sample(self.args.batch_size)
-                batch = replay_memory.Transition(*zip(*transitions))
-                self.rl_agent.update_parameters(batch)
-
-            #Synch RL Agent to NE
-            if self.num_games % self.args.synch_period == 0:
-                self.rl_to_evo(self.rl_agent.actor, self.pop[worst_index])
-                self.evolver.rl_policy = worst_index
-                print('Synch from RL --> Nevo')
-
-    def epoch(self, all_fitness):
-        return self.evolver.epoch(self.pop, all_fitness)
-
-    def sample(self, batch):
-        # print(self.replay_buffer.sample(batch))
-        return self.replay_buffer.sample(batch)
-
-    def add_experience(self, state, action, next_state, reward, done):
-        reward = utils.to_tensor(np.array([reward])).unsqueeze(0)
-        if self.args.is_cuda: reward = reward.cuda()
-        if self.args.use_done_mask:
-            done = utils.to_tensor(np.array([done]).astype('uint8')).unsqueeze(0)
-            if self.args.is_cuda: done = done.cuda()
-        action = utils.to_tensor(action)
-        if self.args.is_cuda: action = action.cuda()
-        self.replay_buffer.push(state, action, next_state, reward, done)
-
-    def evaluate(self, model, num_evals=1, is_action_noise=False, store_transition=True):
-        fitness = 0.0
-        net = ddpg.Actor(self.args)
-        net.load_state_dict(model)
-        for _ in range(num_evals):
-            fitness += self._evaluate(net, is_action_noise=is_action_noise, store_transition=store_transition)
-        return fitness/num_evals, len(self.replay_buffer), \
-               self.num_frames, self.gen_frames, \
-               self.num_games, self.replay_buffer
-
-    def _evaluate(self, net, is_render=False, is_action_noise=False, store_transition=True):
-        total_reward = 0.0
-        state = self.env.reset()
-        state = utils.to_tensor(state).unsqueeze(0)
-        if self.args.is_cuda:
-            state = state.cuda()
-        done = False
-
-        while not done:
-            if store_transition: self.num_frames += 1; self.gen_frames += 1
-            if render and is_render: self.env.render()
-            # print(state)
-            # exit(0)
-            action = net.forward(state)
-            action.clamp(-1, 1)
-            action = utils.to_numpy(action.cpu())
-            if is_action_noise: action += self.ounoise.noise()
-            # print("come there in evaluate")
-            next_state, reward, done, info = self.env.step(action.flatten())  # Simulate one step in environment
-            # print("come there in evaluate")
-            next_state = utils.to_tensor(next_state).unsqueeze(0)
-            if self.args.is_cuda:
-                next_state = next_state.cuda()
-            total_reward += reward
-
-            if store_transition: self.add_experience(state, action, next_state, reward, done)
-            state = next_state
-        if store_transition: self.num_games += 1
-        # print("come here,total_reward:",total_reward)
-        return total_reward
-
-
 def add_experience(state, action, next_state, reward, done, replay_buffer, replay_queue, args):
     reward = utils.to_tensor(np.array([reward])).unsqueeze(0)
     if args.is_cuda: reward = reward.cuda()
@@ -219,13 +114,13 @@ def evaluate(net, env, args, replay_queue, store_transition=True):
         if store_transition:
             add_experience(state, action, next_state, reward, done, replay_buffer, replay_queue, args)
 
-        if len(replay_buffer) > args.batch_size:
+        if len(replay_buffer) > args.batch_size/10:
             transitions = replay_buffer.sample(args.batch_size)
             batch = replay_memory.Transition(*zip(*transitions))
             replay_queue.put(batch)
 
         print(len(replay_buffer))
-        time.sleep(2)
+        time.sleep(1)
         state = next_state
     # if store_transition: self.num_games += 1
     # replay_memory.put(total_reward)
