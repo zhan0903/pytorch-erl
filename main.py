@@ -180,6 +180,58 @@ class Worker(object):
         return total_reward
 
 
+def add_experience(state, action, next_state, reward, done, replay_buffer, replay_queue, args):
+    reward = utils.to_tensor(np.array([reward])).unsqueeze(0)
+    if args.is_cuda: reward = reward.cuda()
+    if args.use_done_mask:
+        done = utils.to_tensor(np.array([done]).astype('uint8')).unsqueeze(0)
+        if args.is_cuda: done = done.cuda()
+    action = utils.to_tensor(action)
+    if args.is_cuda: action = action.cuda()
+    # replay_buffer.appendpend((state, action, next_state, reward, done))
+    # replay_queue.put((state, action, next_state, reward, done))
+    replay_buffer.push(state, action, next_state, reward, done)
+
+
+def evaluate(net, env, args, replay_queue, store_transition=True):
+    total_reward = 0.0
+    state = env.reset()
+    # print(len(self.replay_buffer))
+    state = utils.to_tensor(state).unsqueeze(0)
+    replay_buffer = replay_memory.ReplayMemory(args.buffer_size)
+
+    if args.is_cuda: state = state.cuda()
+    done = False
+    while not done:
+        # if store_transition: num_frames += 1; self.gen_frames += 1
+        # if render and is_render: env.render()
+        action = net.forward(state)
+        action.clamp(-1, 1)
+        action = utils.to_numpy(action.cpu())
+        # if is_action_noise: action += self.ounoise.noise()
+
+        next_state, reward, done, info = env.step(action.flatten())  # Simulate one step in environment
+        next_state = utils.to_tensor(next_state).unsqueeze(0)
+        if args.is_cuda:
+            next_state = next_state.cuda()
+        total_reward += reward
+
+        if store_transition:
+            add_experience(state, action, next_state, reward, done, replay_buffer, replay_queue, args)
+
+        if len(replay_buffer) > args.batch_size:
+            transitions = replay_buffer.sample(args.batch_size)
+            batch = replay_memory.Transition(*zip(*transitions))
+            replay_queue.put(batch)
+
+        print(len(replay_buffer))
+        time.sleep(2)
+        state = next_state
+    # if store_transition: self.num_games += 1
+    # replay_memory.put(total_reward)
+    # replay_memory[key] = self.replay_buffer
+
+
 class Agent:
     def __init__(self, args, env):
         self.args = args; self.env = env
@@ -254,7 +306,6 @@ class Agent:
 
             print(len(experiences))
             time.sleep(2)
-
             state = next_state
         if store_transition: self.num_games += 1
         # replay_memory.put(total_reward)
@@ -265,20 +316,20 @@ class Agent:
 
     def train(self):
         print("begin training")
-        replay_memory = mp.Queue()
+        replay_queue = mp.Queue()
         processes = []
         # with mp.Manager() as manager:
         d = mp.Manager().dict()
         q = mp.Manager().list()
 
-        print(len(d))
-        print(len(q))
-        learner = LearnerThread(d, q)
+        # print(len(d))
+        # print(len(q))
+        learner = LearnerThread(replay_queue)
         learner.start()
 
         for key, pop in enumerate(self.pop):
             pop.share_memory()
-            p = mp.Process(target=self.evaluate, args=(pop, key, d, q))
+            p = mp.Process(target=evaluate, args=(pop, self.env, self.args, replay_queue))
             p.start()
             processes.append(p)
 
@@ -286,8 +337,8 @@ class Agent:
             p.join()
             # results.append(replay_memory.get())
 
-        print(len(d))
-        print(len(q))
+        # print(len(d))
+        # print(len(q))
         # print(q[0])
         # print(len(q))
         # print(len(self.replay_buffer))
@@ -383,7 +434,7 @@ class LearnerThread(threading.Thread):
     addition, moving heavyweight gradient ops session runs off the main thread
     improves overall throughput.
     """
-    def __init__(self, replay_memory, experiences_queue):
+    def __init__(self,replay_queue):
         threading.Thread.__init__(self)
         # self.learner_queue_size = WindowStat("size", 50)
         # self.local_evaluator = local_evaluator
@@ -396,20 +447,21 @@ class LearnerThread(threading.Thread):
         self.stopped = False
         self.stats = {}
         self.replay_memory = replay_memory
-        self.experiences_queue = experiences_queue
+        self.replay_queue = replay_queue
 
     def run(self):
         while not self.stopped:
             self.step()
 
     def step(self):
-        # if not self.experiences_queue.empty():
-        #     print("begin background training")
-        #     time.sleep(1)
-        # else:
-        #     print("none")
-        #     time.sleep(1)
-        #     return
+        if not self.replay_queue.empty():
+            print("begin background training")
+            print("self.replay_queue.qsize", self.replay_queue.qsize())
+            time.sleep(1)
+        else:
+            print("none")
+            time.sleep(1)
+            return
 
         if len(self.replay_memory) is not 0:
             print("begin background training")
