@@ -144,8 +144,8 @@ class Agent:
         self.ounoise = ddpg.OUNoise(args.action_dim)
         self.replay_queue = mp.Queue()
 
-        learner = LearnerThread(self.replay_queue, self.rl_agent)
-        learner.start()
+        self.learner = LearnerThread(self.replay_queue, self.rl_agent)
+        self.learner.start()
 
 
         # Stats
@@ -221,8 +221,8 @@ class Agent:
 
         # print(len(d))
         # print(len(q))
-        learner = LearnerThread(replay_queue)
-        learner.start()
+        # learner = LearnerThread(replay_queue)
+        # learner.start()
 
         for key, pop in enumerate(self.pop):
             pop.share_memory()
