@@ -88,7 +88,7 @@ def add_experience(state, action, next_state, reward, done, replay_buffer, repla
     replay_buffer.push(state, action, next_state, reward, done)
 
 
-def evaluate(net, env, args, replay_queue, store_transition=True):
+def evaluate(net, env, args, replay_queue, fitness, store_transition=True):
     total_reward = 0.0
     state = env.reset()
     # print(len(self.replay_buffer))
@@ -125,6 +125,7 @@ def evaluate(net, env, args, replay_queue, store_transition=True):
     # if store_transition: self.num_games += 1
     # replay_memory.put(total_reward)
     # replay_memory[key] = self.replay_buffer
+    fitness.append(total_reward)
 
 
 class Agent:
@@ -216,8 +217,8 @@ class Agent:
         # replay_queue = mp.Queue()
         processes = []
         # with mp.Manager() as manager:
-        d = mp.Manager().dict()
-        q = mp.Manager().list()
+        dict = mp.Manager().dict()
+        all_fitness = mp.Manager().list()
 
         # print(len(d))
         # print(len(q))
@@ -226,7 +227,7 @@ class Agent:
 
         for key, pop in enumerate(self.pop):
             pop.share_memory()
-            p = mp.Process(target=evaluate, args=(pop, self.env, self.args, self.replay_queue))
+            p = mp.Process(target=evaluate, args=(pop, self.env, self.args, self.replay_queue, all_fitness))
             p.start()
             processes.append(p)
 
@@ -239,34 +240,29 @@ class Agent:
         # print(q[0])
         # print(len(q))
         # print(len(self.replay_buffer))
-        exit(0)
-
-        # for worker in self.workers: worker.set_gen_frames.remote(0)
+        # exit(0)
 
         ####################### EVOLUTION #####################
-        get_num_ids = [worker.get_gen_num.remote() for worker in self.workers]
-        gen_nums = ray.get(get_num_ids)
+        # evaluate_ids = [worker.evaluate.remote(self.pop[key].state_dict(), self.args.num_evals)
+        #                 for key, worker in enumerate(self.workers[:-1])]
+        # results_ea = ray.get(evaluate_ids)
 
-        ##### get new experiences
-        print("gen_nums:{0}".format(gen_nums))
-        evaluate_ids = [worker.evaluate.remote(self.pop[key].state_dict(), self.args.num_evals)
-                        for key, worker in enumerate(self.workers[:-1])]
-        results_ea = ray.get(evaluate_ids)
+        # with self.timers["replay_processing"]:
+        #     if self.learner.inqueue.full():
+        #         self.num_smaples_dropped += 1
+        #     else:
+        #         with self.timers["get_samples"]:
+        #             samples = ray.get(replay)
+        #         self.learner.inqueue.put()
+        #
+        # logger.debug("results:{}".format(results_ea))
 
-        with self.timers["replay_processing"]:
-            if self.learner.inqueue.full():
-                self.num_smaples_dropped += 1
-            else:
-                with self.timers["get_samples"]:
-                    samples = ray.get(replay)
-                self.learner.inqueue.put()
+        # all_fitness
+        print(all_fitness)
 
-        logger.debug("results:{}".format(results_ea))
-
-        all_fitness = []
-
-        for i in range(self.args.pop_size):
-            all_fitness.append(results_ea[i][0])
+        # for i in range(self.args.pop_size):
+        #     all_fitness.append(results_ea[i][0])
+        exit(0)
 
         logger.debug("fitness:{}".format(all_fitness))
         best_train_fitness = max(all_fitness)
@@ -362,6 +358,7 @@ class LearnerThread(threading.Thread):
         #     print("self.replay_queue.qsize", self.replay_queue.qsize())
         #     # time.sleep(1)
         # if self.steps <= self.gen_frames:
+        # print()
         batch = self.replay_queue.get()
         self.rl_agent.update_parameters(batch)
         # self.steps += 1
