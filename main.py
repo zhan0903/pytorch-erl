@@ -88,7 +88,7 @@ def add_experience(state, action, next_state, reward, done, replay_buffer, repla
     replay_buffer.push(state, action, next_state, reward, done)
 
 
-def evaluate(net, env, args, replay_queue, fitness, store_transition=True):
+def evaluate(net, env, args, replay_queue, fitness, dict_all_fitness, key,store_transition=True):
     total_reward = 0.0
     state = env.reset()
     # print(len(self.replay_buffer))
@@ -124,7 +124,7 @@ def evaluate(net, env, args, replay_queue, fitness, store_transition=True):
         state = next_state
     # if store_transition: self.num_games += 1
     # replay_memory.put(total_reward)
-    # replay_memory[key] = self.replay_buffer
+    dict_all_fitness[key] = total_reward
     fitness.append(total_reward)
 
 
@@ -167,57 +167,12 @@ class Agent:
         for target_param, param in zip(evo_net.parameters(), rl_net.parameters()):
             target_param.data.copy_(param.data)
 
-    def add_experience(self, state, action, next_state, reward, done, experiences):
-        reward = utils.to_tensor(np.array([reward])).unsqueeze(0)
-        if self.args.is_cuda: reward = reward.cuda()
-        if self.args.use_done_mask:
-            done = utils.to_tensor(np.array([done]).astype('uint8')).unsqueeze(0)
-            if self.args.is_cuda: done = done.cuda()
-        action = utils.to_tensor(action)
-        if self.args.is_cuda: action = action.cuda()
-        experiences.append((state, action, next_state, reward, done))
-        self.replay_buffer.push(state, action, next_state, reward, done)
-
-    def evaluate(self, net, key, replay_memory, experiences, is_render=False, is_action_noise=False, store_transition=True):
-        total_reward = 0.0
-        state = self.env.reset()
-        # print(len(self.replay_buffer))
-        state = utils.to_tensor(state).unsqueeze(0)
-        if self.args.is_cuda: state = state.cuda()
-        done = False
-        while not done:
-            if store_transition: self.num_frames += 1; self.gen_frames += 1
-            if render and is_render: self.env.render()
-            action = net.forward(state)
-            action.clamp(-1, 1)
-            action = utils.to_numpy(action.cpu())
-            if is_action_noise: action += self.ounoise.noise()
-
-            next_state, reward, done, info = self.env.step(action.flatten())  # Simulate one step in environment
-            next_state = utils.to_tensor(next_state).unsqueeze(0)
-            if self.args.is_cuda:
-                next_state = next_state.cuda()
-            total_reward += reward
-
-            if store_transition:
-                self.add_experience(state, action, next_state, reward, done, experiences)
-
-            print(len(experiences))
-            time.sleep(2)
-            state = next_state
-        if store_transition: self.num_games += 1
-        # replay_memory.put(total_reward)
-        replay_memory[key] = self.replay_buffer
-        # print(total_reward)
-        # print(len(self.replay_buffer))
-        # return total_reward
-
     def train(self):
         print("begin training")
         # replay_queue = mp.Queue()
         processes = []
         # with mp.Manager() as manager:
-        dict = mp.Manager().dict()
+        dict_all_fitness = mp.Manager().dict()
         all_fitness = mp.Manager().list()
 
         # print(len(d))
@@ -227,7 +182,8 @@ class Agent:
 
         for key, pop in enumerate(self.pop):
             pop.share_memory()
-            p = mp.Process(target=evaluate, args=(pop, self.env, self.args, self.replay_queue, all_fitness))
+            p = mp.Process(target=evaluate, args=(pop, self.env, self.args,
+                                                  self.replay_queue, all_fitness, dict_all_fitness, key))
             p.start()
             processes.append(p)
 
@@ -256,10 +212,11 @@ class Agent:
         #         self.learner.inqueue.put()
         #
         # logger.debug("results:{}".format(results_ea))
-
         # all_fitness
-        print(all_fitness)
 
+        print(all_fitness)
+        print(dict_all_fitness)
+        print("steps", self.learner.steps)
         # for i in range(self.args.pop_size):
         #     all_fitness.append(results_ea[i][0])
         exit(0)
@@ -361,7 +318,7 @@ class LearnerThread(threading.Thread):
         # print()
         batch = self.replay_queue.get()
         self.rl_agent.update_parameters(batch)
-        # self.steps += 1
+        self.steps += 1
         # else:
         #     self.stopped = True
 
