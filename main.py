@@ -88,7 +88,7 @@ def add_experience(state, action, next_state, reward, done, replay_buffer, repla
     replay_buffer.push(state, action, next_state, reward, done)
 
 
-def evaluate(net, env, args, replay_queue, fitness, dict_all_fitness, key,store_transition=True):
+def evaluate(net, env, args, replay_queue, dict_all_fitness, key, store_transition=True):
     total_reward = 0.0
     state = env.reset()
     # print(len(self.replay_buffer))
@@ -125,7 +125,7 @@ def evaluate(net, env, args, replay_queue, fitness, dict_all_fitness, key,store_
     # if store_transition: self.num_games += 1
     # replay_memory.put(total_reward)
     dict_all_fitness[key] = total_reward
-    fitness.append(total_reward)
+    # fitness.append(total_reward)
 
 
 class Agent:
@@ -173,7 +173,7 @@ class Agent:
         processes = []
         # with mp.Manager() as manager:
         dict_all_fitness = mp.Manager().dict()
-        all_fitness = mp.Manager().list()
+        all_fitness = mp.Manager().Array()
 
         # print(len(d))
         # print(len(q))
@@ -183,7 +183,7 @@ class Agent:
         for key, pop in enumerate(self.pop):
             pop.share_memory()
             p = mp.Process(target=evaluate, args=(pop, self.env, self.args,
-                                                  self.replay_queue, all_fitness, dict_all_fitness, key))
+                                                  self.replay_queue, dict_all_fitness, key))
             p.start()
             processes.append(p)
 
@@ -217,9 +217,11 @@ class Agent:
         print(all_fitness)
         print(dict_all_fitness)
         print("steps", self.learner.steps)
+
         # for i in range(self.args.pop_size):
         #     all_fitness.append(results_ea[i][0])
-        exit(0)
+
+        # exit(0)
 
         logger.debug("fitness:{}".format(all_fitness))
         best_train_fitness = max(all_fitness)
