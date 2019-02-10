@@ -221,7 +221,7 @@ class Agent:
         # for i in range(self.args.pop_size):
         #     all_fitness.append(results_ea[i][0])
 
-        # exit(0)
+        exit(0)
 
         logger.debug("fitness:{}".format(all_fitness))
         best_train_fitness = max(all_fitness)
