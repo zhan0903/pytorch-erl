@@ -242,8 +242,14 @@ class Agent:
         # Validation test
         champ_index = all_fitness.index(max(all_fitness))
         test_score = 0.0
-        for eval in range(5): test_score += evaluate(self.pop[champ_index],
-                                                     store_transition=False)/5.0
+
+
+        # net, env, args, replay_queue, dict_all_fitness, num_frames_list, key
+        # pop, self.env, self.args, self.replay_queue, dict_all_fitness, num_frames, key
+
+        for eval in range(5): test_score += evaluate(self.pop[champ_index],self.env,
+                                                     self.args, self.replay_queue, dict_all_fitness,num_frames,
+                                                    champ_index, store_transition=False)/5.0
 
         # test_score_id = self.workers[0].evaluate.remote(self.pop[champ_index].state_dict(), 5, store_transition=False)
         # test_score = ray.get(test_score_id)[0]
