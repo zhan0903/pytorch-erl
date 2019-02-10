@@ -47,7 +47,7 @@ class Parameters:
         self.use_ln = True  # True
         self.gamma = 0.99; self.tau = 0.001
         self.seed = 7
-        self.batch_size = 10 # 128
+        self.batch_size = 128 # 128
         self.buffer_size = 1000000
         self.frac_frames_train = 1.0
         self.use_done_mask = True
