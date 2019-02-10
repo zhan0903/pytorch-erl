@@ -141,7 +141,7 @@ class Agent:
 
         # args.is_cuda = True; args.is_memory_cuda = True
         self.rl_agent = ddpg.DDPG(args)
-        self.rl_agent.share_memory()
+        # self.rl_agent.share_memory()
 
         self.ounoise = ddpg.OUNoise(args.action_dim)
         self.replay_queue = mp.Queue()
