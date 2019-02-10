@@ -188,11 +188,10 @@ class Agent:
             p.start()
             processes.append(p)
 
-
         for p in processes:
             p.join()
 
-        exit(0)
+        # exit(0)
 
         ####################### EVOLUTION #####################
         # evaluate_ids = [worker.evaluate.remote(self.pop[key].state_dict(), self.args.num_evals)
