@@ -75,7 +75,7 @@ class Parameters:
 original = False
 
 
-def add_experience(state, action, next_state, reward, done, replay_buffer, replay_queue, args):
+def add_experience(state, action, next_state, reward, done, replay_buffer, args):
     reward = utils.to_tensor(np.array([reward])).unsqueeze(0)
     if args.is_cuda: reward = reward.cuda()
     if args.use_done_mask:
@@ -88,7 +88,7 @@ def add_experience(state, action, next_state, reward, done, replay_buffer, repla
     replay_buffer.push(state, action, next_state, reward, done)
 
 
-def evaluate(net, env, args, replay_queue, dict_all_fitness, num_frames_list, key, store_transition=True):
+def evaluate(net, env, args, replay_queue, dict_all_returns, key, store_transition=True):
     total_reward = 0.0
     state = env.reset()
     num_frames = 0
@@ -112,7 +112,7 @@ def evaluate(net, env, args, replay_queue, dict_all_fitness, num_frames_list, ke
         total_reward += reward
 
         if store_transition:
-            add_experience(state, action, next_state, reward, done, replay_buffer, replay_queue, args)
+            add_experience(state, action, next_state, reward, done, replay_buffer, args)
 
             if len(replay_buffer) > args.batch_size:
                 transitions = replay_buffer.sample(args.batch_size)
@@ -120,8 +120,8 @@ def evaluate(net, env, args, replay_queue, dict_all_fitness, num_frames_list, ke
                 replay_queue.put(batch)
 
         state = next_state
-    dict_all_fitness[key] = total_reward
-    num_frames_list.append(num_frames)
+    dict_all_returns[key] = (total_reward,num_frames)
+    # num_frames_list.append(num_frames)
 
     # fitness.append(total_reward)
 
@@ -172,8 +172,9 @@ class Agent:
         # replay_queue = mp.Queue()
         processes = []
         # with mp.Manager() as manager:
-        dict_all_fitness = mp.Manager().dict()
+        dict_all_returns = mp.Manager().dict()
         num_frames = mp.Manager().list()
+
 
         # print(len(d))
         # print(len(q))
@@ -183,14 +184,15 @@ class Agent:
         for key, pop in enumerate(self.pop):
             pop.share_memory()
             p = mp.Process(target=evaluate, args=(pop, self.env, self.args,
-                                                  self.replay_queue, dict_all_fitness, num_frames, key))
+                                                  self.replay_queue, dict_all_returns, key))
             p.start()
             processes.append(p)
 
 
-
         for p in processes:
             p.join()
+
+        exit(0)
 
         ####################### EVOLUTION #####################
         # evaluate_ids = [worker.evaluate.remote(self.pop[key].state_dict(), self.args.num_evals)
@@ -210,8 +212,9 @@ class Agent:
 
         # print(all_fitness)
         print(processes)
-        print(dict_all_fitness)
-        all_fitness = list(dict_all_fitness.values())
+        print(dict_all_returns)
+        all_fitness = list(dict_all_returns.values()[0])
+        num_frames = list(dict_all_returns.values()[1])
         print(all_fitness)
         print(num_frames)
         self.num_frames = sum(num_frames)
@@ -236,19 +239,22 @@ class Agent:
         # test_score = 0.0
 
         # 并行实现这个
-        test_fitness = mp.Manager().list()
+        test_return = mp.Manager().list()
 
+        # (net, env, args, replay_queue, dict_all_fitness, num_frames_list, key, store_transition=True)
         for _ in range(5):
             p = mp.Process(target=evaluate, args=(self.pop[champ_index], self.env, self.args,
-                                                  self.replay_queue,test_fitness,
-                                                  num_frames,champ_index,store_transition=False))
+                                                  self.replay_queue,test_return,champ_index,False))
             p.start()
             processes.append(p)
 
         for p in processes:
             p.join()
 
-        test_score = sum(test_fitness)/5.0
+        test_score = sum(list(test_return.values()[0]))/5.0
+        # test_score = sum(test_fitness)/5.0
+        print("test_score,",test_score)
+        print("test_return,",test_return)
 
         # NeuroEvolution's probabilistic selection and recombination step
         elite_index = self.evolver.epoch(self.pop, all_fitness)
@@ -264,7 +270,7 @@ class Agent:
             self.evolver.rl_policy = worst_index
             print('Synch from RL --> Nevo')
 
-        print("test_timer:{}".format(test_timer.mean))
+        # print("test_timer:{}".format(test_timer.mean))
 
         return best_train_fitness, test_score, elite_index
 
