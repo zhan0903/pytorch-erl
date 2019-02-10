@@ -215,6 +215,7 @@ class Agent:
         # all_fitness
 
         # print(all_fitness)
+        print(processes)
         print(dict_all_fitness)
         print("steps", self.learner.steps)
         all_fitness = list(dict_all_fitness.values())
@@ -234,9 +235,16 @@ class Agent:
         champ_index = all_fitness.index(max(all_fitness))
         logger.debug("champ_index:{}".format(champ_index))
 
-        test_score_id = self.workers[0].evaluate.remote(self.pop[champ_index].state_dict(), 5, store_transition=False)
-        test_score = ray.get(test_score_id)[0]
-        logger.debug("test_score:{0},champ_index:{1}".format(test_score, champ_index))
+        # Validation test
+        champ_index = all_fitness.index(max(all_fitness))
+        test_score = 0.0
+        for eval in range(5): test_score += evaluate(self.pop[champ_index], is_render=True,
+                                                     is_action_noise=False, store_transition=False)/5.0
+
+        elite_index = self.evolver.epoch(self.pop, all_fitness)
+        # test_score_id = self.workers[0].evaluate.remote(self.pop[champ_index].state_dict(), 5, store_transition=False)
+        # test_score = ray.get(test_score_id)[0]
+        # logger.debug("test_score:{0},champ_index:{1}".format(test_score, champ_index))
 
         # NeuroEvolution's probabilistic selection and recombination step
         elite_index = self.evolver.epoch(self.pop, all_fitness)
