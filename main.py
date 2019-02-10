@@ -172,7 +172,7 @@ class Agent:
         # replay_queue = mp.Queue()
         processes = []
         # with mp.Manager() as manager:
-        all_fitness = mp.Manager().dict()
+        dict_all_fitness = mp.Manager().dict()
         # all_fitness = mp.Manager().list()
 
         # print(len(d))
@@ -183,7 +183,7 @@ class Agent:
         for key, pop in enumerate(self.pop):
             pop.share_memory()
             p = mp.Process(target=evaluate, args=(pop, self.env, self.args,
-                                                  self.replay_queue, all_fitness, key))
+                                                  self.replay_queue, dict_all_fitness, key))
             p.start()
             processes.append(p)
 
@@ -215,13 +215,16 @@ class Agent:
         # all_fitness
 
         # print(all_fitness)
-        print(all_fitness)
+        print(dict_all_fitness)
         print("steps", self.learner.steps)
+        all_fitness = list(dict_all_fitness.values())
+        print(all_fitness)
+
 
         # for i in range(self.args.pop_size):
         #     all_fitness.append(results_ea[i][0])
 
-        exit(0)
+        # exit(0)
 
         logger.debug("fitness:{}".format(all_fitness))
         best_train_fitness = max(all_fitness)
