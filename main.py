@@ -224,6 +224,7 @@ class Agent:
         print(num_frames)
         self.num_frames = sum(num_frames)
         print("self.num_frames ", self.num_frames)
+        print("steps", self.learner.steps)
 
 
         # for i in range(self.args.pop_size):
@@ -247,6 +248,8 @@ class Agent:
         # net, env, args, replay_queue, dict_all_fitness, num_frames_list, key
         # pop, self.env, self.args, self.replay_queue, dict_all_fitness, num_frames, key
 
+
+        # 并行实现这个
         # for eval in range(5): test_score += evaluate(self.pop[champ_index],self.env,
         #                                              self.args, self.replay_queue, dict_all_fitness,num_frames,
         #                                             champ_index, store_transition=False)/5.0
@@ -258,6 +261,8 @@ class Agent:
         # NeuroEvolution's probabilistic selection and recombination step
         elite_index = self.evolver.epoch(self.pop, all_fitness)
         ###################### DDPG #########################
+
+        time.sleep(1)
         print("steps", self.learner.steps)
 
         exit(0)
