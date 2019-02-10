@@ -184,7 +184,7 @@ class Agent:
 
         for key, pop in enumerate(self.pop):
             pop.share_memory()
-            p = mp.Process(target=evaluate, args=(pop, self.env, self.args,
+            p = mp.Process(target=evaluate, args=(pop, self.args,
                                                   self.replay_queue, dict_all_returns, key))
             p.start()
             processes.append(p)
@@ -243,7 +243,7 @@ class Agent:
 
         # (net, env, args, replay_queue, dict_all_fitness, num_frames_list, key, store_transition=True)
         for _ in range(5):
-            p = mp.Process(target=evaluate, args=(self.pop[champ_index], self.env, self.args,
+            p = mp.Process(target=evaluate, args=(self.pop[champ_index], self.args,
                                                   self.replay_queue,test_return,champ_index,False))
             p.start()
             processes.append(p)
