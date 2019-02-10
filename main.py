@@ -88,17 +88,17 @@ def add_experience(state, action, next_state, reward, done, replay_buffer, repla
     replay_buffer.push(state, action, next_state, reward, done)
 
 
-def evaluate(net, env, args, replay_queue, dict_all_fitness, key, store_transition=True):
+def evaluate(net, env, args, replay_queue, dict_all_fitness, num_frames, key, store_transition=True):
     total_reward = 0.0
     state = env.reset()
-    # print(len(self.replay_buffer))
+    num_frames = 0
     state = utils.to_tensor(state).unsqueeze(0)
     replay_buffer = replay_memory.ReplayMemory(args.buffer_size)
 
     if args.is_cuda: state = state.cuda()
     done = False
     while not done:
-        # if store_transition: num_frames += 1; self.gen_frames += 1
+        if store_transition: num_frames += 1
         # if render and is_render: env.render()
         action = net.forward(state)
         action.clamp(-1, 1)
@@ -125,6 +125,8 @@ def evaluate(net, env, args, replay_queue, dict_all_fitness, key, store_transiti
     # if store_transition: self.num_games += 1
     # replay_memory.put(total_reward)
     dict_all_fitness[key] = total_reward
+    num_frames.append(num_frames)
+
     # fitness.append(total_reward)
 
 
@@ -173,7 +175,7 @@ class Agent:
         processes = []
         # with mp.Manager() as manager:
         dict_all_fitness = mp.Manager().dict()
-        # all_fitness = mp.Manager().list()
+        num_frames = mp.Manager().list()
 
         # print(len(d))
         # print(len(q))
@@ -183,7 +185,7 @@ class Agent:
         for key, pop in enumerate(self.pop):
             pop.share_memory()
             p = mp.Process(target=evaluate, args=(pop, self.env, self.args,
-                                                  self.replay_queue, dict_all_fitness, key))
+                                                  self.replay_queue, dict_all_fitness, num_frames, key))
             p.start()
             processes.append(p)
 
@@ -217,15 +219,17 @@ class Agent:
         # print(all_fitness)
         print(processes)
         print(dict_all_fitness)
-        print("steps", self.learner.steps)
         all_fitness = list(dict_all_fitness.values())
         print(all_fitness)
+        print(num_frames)
+        self.num_frames = sum(num_frames)
+        print("self.num_frames ", self.num_frames)
 
 
         # for i in range(self.args.pop_size):
         #     all_fitness.append(results_ea[i][0])
 
-        exit(0)
+        # exit(0)
 
         logger.debug("fitness:{}".format(all_fitness))
         best_train_fitness = max(all_fitness)
@@ -241,7 +245,6 @@ class Agent:
         for eval in range(5): test_score += evaluate(self.pop[champ_index], is_render=True,
                                                      is_action_noise=False, store_transition=False)/5.0
 
-        elite_index = self.evolver.epoch(self.pop, all_fitness)
         # test_score_id = self.workers[0].evaluate.remote(self.pop[champ_index].state_dict(), 5, store_transition=False)
         # test_score = ray.get(test_score_id)[0]
         # logger.debug("test_score:{0},champ_index:{1}".format(test_score, champ_index))
@@ -249,41 +252,13 @@ class Agent:
         # NeuroEvolution's probabilistic selection and recombination step
         elite_index = self.evolver.epoch(self.pop, all_fitness)
         ###################### DDPG #########################
-        result_rl_id = self.workers[-1].evaluate.remote(self.rl_agent.actor.state_dict(), is_action_noise=True) #Train
-        result_rl = ray.get(result_rl_id)
+        print("steps", self.learner.steps)
 
-        logger.debug("results_rl:{}".format(result_rl))
-        results_ea.append(result_rl)
-
-        # gen_frames = 0; num_games = 0; len_replay = 0;num_frames = 0
-        sum_results = np.sum(results_ea, axis=0)
-        # test = sum(results_ea)
-        # fitness / num_evals, len(relay_buff), self.num_frames, self.gen_frames, self.num_game
-        # logger.debug("test:{0},results_ea:{1}".format(sum_results, results_ea))
-
-        self.len_replay = sum_results[1]
-        self.num_frames = sum_results[2]
-        self.gen_frames = sum_results[3]
-        self.num_games = sum_results[4]
-
-        test_timer = TimerStat()
-        print("gen_frames:{}".format(self.gen_frames))
-
-        with test_timer:
-            if self.len_replay > self.args.batch_size * 5:
-                for _ in range(int(self.gen_frames * self.args.frac_frames_train)):
-                    sample_choose = np.random.randint(self.args.pop_size+1)
-                    transitions_id = self.workers[sample_choose].sample.remote(self.args.batch_size)
-                    transitions = ray.get(transitions_id)
-                    # transitions = results_ea[sample_choose][0].sample(self.args.batch_size)
-                    batch = replay_memory.Transition(*zip(*transitions))
-                    self.rl_agent.update_parameters(batch)
-
-                # Synch RL Agent to NE
-                if self.num_games % self.args.synch_period == 0:
-                    self.rl_to_evo(self.rl_agent.actor, self.pop[worst_index])
-                    self.evolver.rl_policy = worst_index
-                    print('Synch from RL --> Nevo')
+        exit(0)
+        if self.num_games % self.args.synch_period == 0:
+            self.rl_to_evo(self.rl_agent.actor, self.pop[worst_index])
+            self.evolver.rl_policy = worst_index
+            print('Synch from RL --> Nevo')
 
         print("test_timer:{}".format(test_timer.mean))
 
