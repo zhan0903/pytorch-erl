@@ -119,8 +119,8 @@ def evaluate(net, env, args, replay_queue, store_transition=True):
             batch = replay_memory.Transition(*zip(*transitions))
             replay_queue.put(batch)
 
-        print(len(replay_buffer))
-        time.sleep(1)
+        # print(len(replay_buffer))
+        # time.sleep(1)
         state = next_state
     # if store_transition: self.num_games += 1
     # replay_memory.put(total_reward)
