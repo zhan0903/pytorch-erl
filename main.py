@@ -141,13 +141,13 @@ class Agent:
 
         # args.is_cuda = True; args.is_memory_cuda = True
         self.rl_agent = ddpg.DDPG(args)
+        self.rl_agent.share_memory()
+
         self.ounoise = ddpg.OUNoise(args.action_dim)
         self.replay_queue = mp.Queue()
 
         self.learner = LearnerThread(self.replay_queue, self.rl_agent)
         self.learner.start()
-
-
         # Stats
         self.timers = {
             k: TimerStat()
@@ -323,7 +323,7 @@ class Agent:
 
         return best_train_fitness, test_score, elite_index
 
-
+# 每轮训练都新建一个线程->not need, gen_number is not need now
 class LearnerThread(threading.Thread):
     """Background thread that updates the local model from replay data.
     The learner thread communicates with the main thread through Queues. This
@@ -346,24 +346,32 @@ class LearnerThread(threading.Thread):
         # self.replay_memory = replay_memory
         self.replay_queue = replay_queue
         self.rl_agent = rl_agent
+        self.steps = 0
+        self.gen_frames = 1000
 
     def run(self):
         while not self.stopped:
             self.step()
+        # return self.rl_agent
 
     def step(self):
-        if not self.replay_queue.empty():
-            print("begin background training")
-            print("self.replay_queue.qsize", self.replay_queue.qsize())
-            print(self.replay_queue.get())
-            print("self.replay_queue.qsize", self.replay_queue.qsize())
-            time.sleep(1)
-            # batch = self.replay_queue.get()
-            # self.rl_agent.update_parameters(batch)
-        else:
-            print("none")
-            time.sleep(1)
-            return
+        # if not self.replay_queue.empty()  and :
+        #     print("begin background training")
+        #     print("self.replay_queue.qsize", self.replay_queue.qsize())
+        #     print(self.replay_queue.get())
+        #     print("self.replay_queue.qsize", self.replay_queue.qsize())
+        #     # time.sleep(1)
+        # if self.steps <= self.gen_frames:
+        batch = self.replay_queue.get()
+        self.rl_agent.update_parameters(batch)
+        # self.steps += 1
+        # else:
+        #     self.stopped = True
+
+        # else:
+        #     print("none")
+        #     time.sleep(1)
+        #     return
 
         # if len(self.replay_memory) is not 0:
         #     print("begin background training")
