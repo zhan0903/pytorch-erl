@@ -114,16 +114,12 @@ def evaluate(net, env, args, replay_queue, dict_all_fitness, num_frames_list, ke
         if store_transition:
             add_experience(state, action, next_state, reward, done, replay_buffer, replay_queue, args)
 
-        if len(replay_buffer) > args.batch_size:
-            transitions = replay_buffer.sample(args.batch_size)
-            batch = replay_memory.Transition(*zip(*transitions))
-            replay_queue.put(batch)
+            if len(replay_buffer) > args.batch_size:
+                transitions = replay_buffer.sample(args.batch_size)
+                batch = replay_memory.Transition(*zip(*transitions))
+                replay_queue.put(batch)
 
-        # print(len(replay_buffer))
-        # time.sleep(1)
         state = next_state
-    # if store_transition: self.num_games += 1
-    # replay_memory.put(total_reward)
     dict_all_fitness[key] = total_reward
     num_frames_list.append(num_frames)
 
@@ -148,6 +144,8 @@ class Agent:
 
         self.ounoise = ddpg.OUNoise(args.action_dim)
         self.replay_queue = mp.Queue()
+
+        self.workers = self.pop.append(self.rl_agent.actor)
 
         self.learner = LearnerThread(self.replay_queue, self.rl_agent)
         self.learner.start()
@@ -189,16 +187,10 @@ class Agent:
             p.start()
             processes.append(p)
 
+
+
         for p in processes:
             p.join()
-            # results.append(replay_memory.get())
-
-        # print(len(d))
-        # print(len(q))
-        # print(q[0])
-        # print(len(q))
-        # print(len(self.replay_buffer))
-        # exit(0)
 
         ####################### EVOLUTION #####################
         # evaluate_ids = [worker.evaluate.remote(self.pop[key].state_dict(), self.args.num_evals)
@@ -241,31 +233,32 @@ class Agent:
         logger.debug("champ_index:{}".format(champ_index))
 
         # Validation test
-        champ_index = all_fitness.index(max(all_fitness))
-        test_score = 0.0
-
-
-        # net, env, args, replay_queue, dict_all_fitness, num_frames_list, key
-        # pop, self.env, self.args, self.replay_queue, dict_all_fitness, num_frames, key
-
+        # test_score = 0.0
 
         # 并行实现这个
-        # for eval in range(5): test_score += evaluate(self.pop[champ_index],self.env,
-        #                                              self.args, self.replay_queue, dict_all_fitness,num_frames,
-        #                                             champ_index, store_transition=False)/5.0
+        test_fitness = mp.Manager().list()
 
-        # test_score_id = self.workers[0].evaluate.remote(self.pop[champ_index].state_dict(), 5, store_transition=False)
-        # test_score = ray.get(test_score_id)[0]
-        # logger.debug("test_score:{0},champ_index:{1}".format(test_score, champ_index))
+        for _ in range(5):
+            p = mp.Process(target=evaluate, args=(self.pop[champ_index], self.env, self.args,
+                                                  self.replay_queue,test_fitness,
+                                                  num_frames,champ_index,store_transition=False))
+            p.start()
+            processes.append(p)
+
+        for p in processes:
+            p.join()
+
+        test_score = sum(test_fitness)/5.0
 
         # NeuroEvolution's probabilistic selection and recombination step
         elite_index = self.evolver.epoch(self.pop, all_fitness)
-        ###################### DDPG #########################
-
-        time.sleep(1)
         print("steps", self.learner.steps)
+        # exit(0)
 
-        exit(0)
+        ###################### DDPG #########################
+        # DDPG Experience Collection
+        # self.evaluate(self.rl_agent.actor, is_render=False, is_action_noise=True)  # Train
+
         if self.num_games % self.args.synch_period == 0:
             self.rl_to_evo(self.rl_agent.actor, self.pop[worst_index])
             self.evolver.rl_policy = worst_index
@@ -399,7 +392,7 @@ if __name__ == "__main__":
             if elite_index != None: torch.save(agent.pop[elite_index].state_dict(), parameters.save_foldername + 'evo_net')
             print("Progress Saved")
 
-        # exit(0)
+        exit(0)
 
 
 
