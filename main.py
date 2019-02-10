@@ -88,8 +88,9 @@ def add_experience(state, action, next_state, reward, done, replay_buffer, args)
     replay_buffer.push(state, action, next_state, reward, done)
 
 
-def evaluate(net, env, args, replay_queue, dict_all_returns, key, store_transition=True):
+def evaluate(net, args, replay_queue, dict_all_returns, key, store_transition=True):
     total_reward = 0.0
+    env = utils.NormalizedActions(gym.make(env_tag))
     state = env.reset()
     num_frames = 0
     state = utils.to_tensor(state).unsqueeze(0)
