@@ -88,7 +88,7 @@ def add_experience(state, action, next_state, reward, done, replay_buffer, repla
     replay_buffer.push(state, action, next_state, reward, done)
 
 
-def evaluate(net, env, args, replay_queue, dict_all_fitness, num_frames, key, store_transition=True):
+def evaluate(net, env, args, replay_queue, dict_all_fitness, num_frames_list, key, store_transition=True):
     total_reward = 0.0
     state = env.reset()
     num_frames = 0
@@ -125,7 +125,7 @@ def evaluate(net, env, args, replay_queue, dict_all_fitness, num_frames, key, st
     # if store_transition: self.num_games += 1
     # replay_memory.put(total_reward)
     dict_all_fitness[key] = total_reward
-    num_frames.append(num_frames)
+    num_frames_list.append(num_frames)
 
     # fitness.append(total_reward)
 
@@ -242,8 +242,8 @@ class Agent:
         # Validation test
         champ_index = all_fitness.index(max(all_fitness))
         test_score = 0.0
-        for eval in range(5): test_score += evaluate(self.pop[champ_index], is_render=True,
-                                                     is_action_noise=False, store_transition=False)/5.0
+        for eval in range(5): test_score += evaluate(self.pop[champ_index],
+                                                     store_transition=False)/5.0
 
         # test_score_id = self.workers[0].evaluate.remote(self.pop[champ_index].state_dict(), 5, store_transition=False)
         # test_score = ray.get(test_score_id)[0]
