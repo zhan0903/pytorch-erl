@@ -47,7 +47,7 @@ class Parameters:
         self.use_ln = True  # True
         self.gamma = 0.99; self.tau = 0.001
         self.seed = 7
-        self.batch_size = 128 # 128
+        self.batch_size = 10 # 128
         self.buffer_size = 1000000
         self.frac_frames_train = 1.0
         self.use_done_mask = True
@@ -251,10 +251,10 @@ class Agent:
         for p in processes:
             p.join()
 
-        test_score = sum(list(test_return.values()[0]))/5.0
         # test_score = sum(test_fitness)/5.0
-        print("test_score,",test_score)
+        # print("test_score,",test_score)
         print("test_return,",test_return)
+        test_score = sum(list(test_return.values()[0])) / 5.0
 
         # NeuroEvolution's probabilistic selection and recombination step
         elite_index = self.evolver.epoch(self.pop, all_fitness)
