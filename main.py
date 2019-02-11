@@ -324,9 +324,9 @@ class LearnerThread(threading.Thread):
 
         # print(self.replay_queue.qsize())
         time.sleep(1)
-        # if not self.replay_queue.empty():
-        #     print("come inside")
-        #     print(self.replay_queue.qsize())
+        if not self.replay_queue.empty():
+            # print("come inside")
+            print(self.replay_queue.qsize())
         #     print("replay_queue,", self.replay_queue)
         #     batch = self.replay_queue.get()
         #     print("batch,", batch)
