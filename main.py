@@ -149,7 +149,7 @@ class Agent:
         self.workers = self.pop.append(self.rl_agent.actor)
 
         self.learner = LearnerThread(self.replay_queue, self.rl_agent)
-        self.learner.start()
+        # self.learner.start()
         # Stats
         self.timers = {
             k: TimerStat()
