@@ -152,13 +152,13 @@ class Agent:
         self.learner = LearnerThread(self.replay_queue, self.rl_agent)
         # self.learner.start()
         # Stats
-        self.timers = {
-            k: TimerStat()
-            for k in [
-            "put_weights", "get_samples", "sample_processing",
-            "replay_processing", "update_priorities", "train", "sample"
-        ]
-        }
+        # self.timers = {
+        #     k: TimerStat()
+        #     for k in [
+        #     "put_weights", "get_samples", "sample_processing",
+        #     "replay_processing", "update_priorities", "train", "sample"
+        # ]
+        # }
 
         self.num_games = 0; self.num_frames = 0; self.gen_frames = 0; self.len_replay = 0
 
