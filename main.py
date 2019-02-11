@@ -119,7 +119,7 @@ def evaluate(net, args, replay_queue, dict_all_returns, key, store_transition=Tr
             if len(replay_buffer) > args.batch_size:
                 transitions = replay_buffer.sample(args.batch_size)
                 batch = replay_memory.Transition(*zip(*transitions))
-                replay_queue.put(batch)
+                replay_queue.append(batch)
 
         state = next_state
     dict_all_returns[key] = (total_reward,num_frames)
@@ -145,7 +145,7 @@ class Agent:
         # self.rl_agent.share_memory()
 
         self.ounoise = ddpg.OUNoise(args.action_dim)
-        self.replay_queue = mp.Manager().Queue()
+        self.replay_queue = mp.Manager().list()
 
         self.workers = self.pop.append(self.rl_agent.actor)
 
@@ -317,16 +317,18 @@ class LearnerThread(threading.Thread):
         #     # time.sleep(1)
         # if self.steps <= self.gen_frames:
         # print()
-        print(self.replay_queue.qsize())
+        print(self.replay_queue)
+
+        # print(self.replay_queue.qsize())
         time.sleep(1)
-        if not self.replay_queue.empty():
-            print("come inside")
-            print(self.replay_queue.qsize())
-            print("replay_queue,", self.replay_queue)
-            batch = self.replay_queue.get()
-            print("batch,", batch)
-            self.rl_agent.update_parameters(batch)
-            self.steps += 1
+        # if not self.replay_queue.empty():
+        #     print("come inside")
+        #     print(self.replay_queue.qsize())
+        #     print("replay_queue,", self.replay_queue)
+        #     batch = self.replay_queue.get()
+        #     print("batch,", batch)
+        #     self.rl_agent.update_parameters(batch)
+        #     self.steps += 1
         # else:
         #     self.stopped = True
 
@@ -366,7 +368,7 @@ if __name__ == "__main__":
     tracker = utils.Tracker(parameters, ['erl'], '_score.csv')  # Initiate tracker
     frame_tracker = utils.Tracker(parameters, ['frame_erl'], '_score.csv')  # Initiate tracker
     time_tracker = utils.Tracker(parameters, ['time_erl'], '_score.csv')
-    mp.set_start_method('forkserver')
+    mp.set_start_method('spawn')
 
     # learner = LearnerThread(self.local_evaluator)
     # learner.start()
