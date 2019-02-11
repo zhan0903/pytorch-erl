@@ -317,6 +317,7 @@ class LearnerThread(threading.Thread):
         #     # time.sleep(1)
         # if self.steps <= self.gen_frames:
         # print()
+        print(self.replay_queue.qsize())
         if not self.replay_queue.empty():
             batch = self.replay_queue.get()
             self.rl_agent.update_parameters(batch)
