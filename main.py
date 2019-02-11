@@ -317,9 +317,10 @@ class LearnerThread(threading.Thread):
         #     # time.sleep(1)
         # if self.steps <= self.gen_frames:
         # print()
-        batch = self.replay_queue.get()
-        self.rl_agent.update_parameters(batch)
-        self.steps += 1
+        if not self.replay_queue.empty():
+            batch = self.replay_queue.get()
+            self.rl_agent.update_parameters(batch)
+            self.steps += 1
         # else:
         #     self.stopped = True
 
