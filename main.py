@@ -119,7 +119,7 @@ def evaluate(net, args, replay_queue, dict_all_returns, key, store_transition=Tr
             if len(replay_buffer) > args.batch_size:
                 transitions = replay_buffer.sample(args.batch_size)
                 batch = replay_memory.Transition(*zip(*transitions))
-                # replay_queue.put(batch)
+                replay_queue.put(batch)
         state = next_state
     dict_all_returns[key] = (total_reward,num_frames)
     # num_frames_list.append(num_frames)
