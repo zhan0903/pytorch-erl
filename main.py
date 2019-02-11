@@ -254,6 +254,7 @@ class Agent:
         # test_score = sum(test_fitness)/5.0
         # print("test_score,",test_score)
         print("test_return,",test_return)
+        exit(0)
         test_score = sum(list(test_return.values()[0])) / 5.0
 
         # NeuroEvolution's probabilistic selection and recombination step
