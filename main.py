@@ -145,7 +145,7 @@ class Agent:
         # self.rl_agent.share_memory()
 
         self.ounoise = ddpg.OUNoise(args.action_dim)
-        self.replay_queue = mp.Queue() # mp.Manager().list()
+        self.replay_queue = mp.queues.SimpleQueue() # mp.Manager().list()
 
         self.workers = self.pop.append(self.rl_agent.actor)
 
