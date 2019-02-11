@@ -357,7 +357,7 @@ if __name__ == "__main__":
     tracker = utils.Tracker(parameters, ['erl'], '_score.csv')  # Initiate tracker
     frame_tracker = utils.Tracker(parameters, ['frame_erl'], '_score.csv')  # Initiate tracker
     time_tracker = utils.Tracker(parameters, ['time_erl'], '_score.csv')
-    mp.set_start_method('spawn')
+    mp.set_start_method('forkserver')
 
     # learner = LearnerThread(self.local_evaluator)
     # learner.start()
