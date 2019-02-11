@@ -193,6 +193,7 @@ class Agent:
             p.join()
 
         # exit(0)
+        print("finished EA")
 
         ####################### EVOLUTION #####################
         # evaluate_ids = [worker.evaluate.remote(self.pop[key].state_dict(), self.args.num_evals)
@@ -357,7 +358,7 @@ if __name__ == "__main__":
     tracker = utils.Tracker(parameters, ['erl'], '_score.csv')  # Initiate tracker
     frame_tracker = utils.Tracker(parameters, ['frame_erl'], '_score.csv')  # Initiate tracker
     time_tracker = utils.Tracker(parameters, ['time_erl'], '_score.csv')
-    mp.set_start_method('forkserver')
+    mp.set_start_method('spawn')
 
     # learner = LearnerThread(self.local_evaluator)
     # learner.start()
