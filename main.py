@@ -322,7 +322,7 @@ class LearnerThread(threading.Thread):
         if not self.replay_queue.empty():
             print("come inside")
             print(self.replay_queue.qsize())
-            print("replay_queue,",self.replay_queue)
+            print("replay_queue,", self.replay_queue)
             batch = self.replay_queue.get()
             print("batch,", batch)
             self.rl_agent.update_parameters(batch)
@@ -366,7 +366,7 @@ if __name__ == "__main__":
     tracker = utils.Tracker(parameters, ['erl'], '_score.csv')  # Initiate tracker
     frame_tracker = utils.Tracker(parameters, ['frame_erl'], '_score.csv')  # Initiate tracker
     time_tracker = utils.Tracker(parameters, ['time_erl'], '_score.csv')
-    mp.set_start_method('spawn')
+    mp.set_start_method('forkserver')
 
     # learner = LearnerThread(self.local_evaluator)
     # learner.start()
