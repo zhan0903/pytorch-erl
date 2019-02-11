@@ -113,14 +113,13 @@ def evaluate(net, args, replay_queue, dict_all_returns, key, store_transition=Tr
             next_state = next_state.cuda()
         total_reward += reward
 
-
         if store_transition:
             add_experience(state, action, next_state, reward, done, replay_buffer, args)
 
             if len(replay_buffer) > args.batch_size:
                 transitions = replay_buffer.sample(args.batch_size)
                 batch = replay_memory.Transition(*zip(*transitions))
-                # replay_queue.put(batch)
+                replay_queue.put(batch)
 
         state = next_state
     dict_all_returns[key] = (total_reward,num_frames)
@@ -146,12 +145,12 @@ class Agent:
         # self.rl_agent.share_memory()
 
         self.ounoise = ddpg.OUNoise(args.action_dim)
-        self.replay_queue = mp.Queue()
+        self.replay_queue = mp.Manager().Queue()
 
         self.workers = self.pop.append(self.rl_agent.actor)
 
         self.learner = LearnerThread(self.replay_queue, self.rl_agent)
-        # self.learner.start()
+        self.learner.start()
         # Stats
         self.timers = {
             k: TimerStat()
