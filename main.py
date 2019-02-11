@@ -195,6 +195,7 @@ class Agent:
 
         # exit(0)
         print("finished EA,time:",(time.time()-time_start))
+        exit(0)
 
 
         ####################### EVOLUTION #####################
