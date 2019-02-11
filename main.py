@@ -121,7 +121,7 @@ def evaluate(net, args, replay_queue, dict_all_returns, key, store_transition=Tr
                 batch = replay_memory.Transition(*zip(*transitions))
                 replay_queue.put(batch)
         state = next_state
-    dict_all_returns[key] = (total_reward,num_frames)
+    dict_all_returns[key] = (total_reward, num_frames)
     # num_frames_list.append(num_frames)
 
     # fitness.append(total_reward)
@@ -144,13 +144,13 @@ class Agent:
         # self.rl_agent.share_memory()
 
         self.ounoise = ddpg.OUNoise(args.action_dim)
-        # self.replay_queue = mp.Manager().Queue() # mp.Manager().list()
-        self.replay_queue = mp.Queue()
+        self.replay_queue = mp.Manager().Queue()  # mp.Manager().list()
+        # self.replay_queue = mp.Queue()
 
         self.workers = self.pop.append(self.rl_agent.actor)
 
         self.learner = LearnerThread(self.replay_queue, self.rl_agent)
-        # self.learner.start()
+        self.learner.start()
         # Stats
         # self.timers = {
         #     k: TimerStat()
