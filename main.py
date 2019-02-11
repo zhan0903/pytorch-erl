@@ -9,9 +9,9 @@ import torch.multiprocessing as mp
 import time
 import logging
 import copy
-import ray
+# import ray
 import threading,queue
-from ray.rllib.utils.timer import TimerStat
+# from ray.rllib.utils.timer import TimerStat
 
 
 render = False
@@ -291,8 +291,8 @@ class LearnerThread(threading.Thread):
         # self.local_evaluator = local_evaluator
         # self.inqueue = queue.Queue(maxsize=LEARNER_QUEUE_MAX_SIZE)
         # self.outqueue = queue.Queue()
-        self.queue_timer = TimerStat()
-        self.grad_timer = TimerStat()
+        # self.queue_timer = TimerStat()
+        # self.grad_timer = TimerStat()
         self.daemon = True
         self.weights_updated = False
         self.stopped = False
