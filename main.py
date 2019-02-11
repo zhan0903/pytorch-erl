@@ -119,7 +119,7 @@ def evaluate(net, args, replay_queue, dict_all_returns, key, store_transition=Tr
             if len(replay_buffer) > args.batch_size:
                 transitions = replay_buffer.sample(args.batch_size)
                 batch = replay_memory.Transition(*zip(*transitions))
-                replay_queue.append(batch)
+                replay_queue.put(batch)
 
         state = next_state
     dict_all_returns[key] = (total_reward,num_frames)
@@ -145,7 +145,7 @@ class Agent:
         # self.rl_agent.share_memory()
 
         self.ounoise = ddpg.OUNoise(args.action_dim)
-        self.replay_queue = mp.Manager().list()
+        self.replay_queue = mp.queue() # mp.Manager().list()
 
         self.workers = self.pop.append(self.rl_agent.actor)
 
