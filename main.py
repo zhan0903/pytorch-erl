@@ -105,6 +105,7 @@ def evaluate(net, args, replay_queue, dict_all_returns, key, store_transition=Tr
         action.clamp(-1, 1)
         action = utils.to_numpy(action.cpu())
         # if is_action_noise: action += self.ounoise.noise()
+        # print("1")
 
         next_state, reward, done, info = env.step(action.flatten())  # Simulate one step in environment
         next_state = utils.to_tensor(next_state).unsqueeze(0)
@@ -112,13 +113,14 @@ def evaluate(net, args, replay_queue, dict_all_returns, key, store_transition=Tr
             next_state = next_state.cuda()
         total_reward += reward
 
+
         if store_transition:
             add_experience(state, action, next_state, reward, done, replay_buffer, args)
 
             if len(replay_buffer) > args.batch_size:
                 transitions = replay_buffer.sample(args.batch_size)
                 batch = replay_memory.Transition(*zip(*transitions))
-                replay_queue.put(batch)
+                # replay_queue.put(batch)
 
         state = next_state
     dict_all_returns[key] = (total_reward,num_frames)
