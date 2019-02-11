@@ -182,6 +182,7 @@ class Agent:
         # learner = LearnerThread(replay_queue)
         # learner.start()
 
+        time_start = time.time()
         for key, pop in enumerate(self.pop):
             pop.share_memory()
             p = mp.Process(target=evaluate, args=(pop, self.args,
@@ -193,7 +194,8 @@ class Agent:
             p.join()
 
         # exit(0)
-        print("finished EA")
+        print("finished EA,time:",(time.time()-time_start))
+
 
         ####################### EVOLUTION #####################
         # evaluate_ids = [worker.evaluate.remote(self.pop[key].state_dict(), self.args.num_evals)
