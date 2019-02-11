@@ -322,7 +322,9 @@ class LearnerThread(threading.Thread):
         if not self.replay_queue.empty():
             print("come inside")
             print(self.replay_queue.qsize())
+            print("replay_queue,",self.replay_queue)
             batch = self.replay_queue.get()
+            print("batch,", batch)
             self.rl_agent.update_parameters(batch)
             self.steps += 1
         # else:
