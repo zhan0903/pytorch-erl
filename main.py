@@ -129,7 +129,7 @@ def evaluate(net, args, replay_queue, dict_all_returns, key, store_transition=Tr
 
 class Agent:
     def __init__(self, args, env):
-        self.args = args; self.env = env
+        self.args = args
         self.evolver = utils_ne.SSNE(self.args)
         # self.replay_buffer = replay_memory.ReplayMemory(args.buffer_size)
         self.pop = []
