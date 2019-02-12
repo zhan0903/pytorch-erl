@@ -248,7 +248,7 @@ class Agent:
         # test_score = 0.0
 
         # 并行实现这个
-        test_return = mp.Manager().list()
+        test_return = mp.Manager().dict()
 
         # (net, env, args, replay_queue, dict_all_fitness, num_frames_list, key, store_transition=True)
         for _ in range(5):
