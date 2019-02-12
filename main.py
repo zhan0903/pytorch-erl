@@ -182,7 +182,7 @@ class Agent:
         # with mp.Manager() as manager:
         dict_all_returns = mp.Manager().dict()
         num_frames = mp.Manager().list()
-        print(self.replay_memory[:10])
+        print(self.replay_memory)
 
         # print(len(d))
         # print(len(q))
@@ -231,7 +231,7 @@ class Agent:
         print("self.num_frames ", self.num_frames)
         print("steps", self.learner.steps)
 
-        print(self.replay_memory)
+        print(self.replay_memory[:2])
 
 
         # for i in range(self.args.pop_size):
