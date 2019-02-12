@@ -329,11 +329,14 @@ class LearnerThread(threading.Thread):
         key = random.randint(0,9)
         print("key,",key)
         print(self.replay_memory[key])
+        print(len(self.replay_memory))
         if len(self.replay_memory[key]) > 0:
             transitions = self.replay_memory[key].sample(self.args.batch_size)
-            batch = replay_memory.Transition(*zip(*transitions))
-            self.rl_agent.update_parameters(batch)
-            self.steps += 1
+
+
+            # batch = replay_memory.Transition(*zip(*transitions))
+            # self.rl_agent.update_parameters(batch)
+            # self.steps += 1
 
         # print(self.replay_queue.qsize())
         # time.sleep(1)
