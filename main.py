@@ -88,13 +88,14 @@ def add_experience(state, action, next_state, reward, done, replay_buffer, args)
     replay_buffer.push(state, action, next_state, reward, done)
 
 
-def evaluate(net, args, replay_queue, dict_all_returns, key, store_transition=True):
+def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=True):
     total_reward = 0.0
     env = utils.NormalizedActions(gym.make(env_tag))
     state = env.reset()
     num_frames = 0
     state = utils.to_tensor(state).unsqueeze(0)
     replay_buffer = replay_memory.ReplayMemory(args.buffer_size)
+    replay_memory[key] = replay_memory
 
     if args.is_cuda: state = state.cuda()
     done = False
@@ -115,11 +116,12 @@ def evaluate(net, args, replay_queue, dict_all_returns, key, store_transition=Tr
 
         if store_transition:
             add_experience(state, action, next_state, reward, done, replay_buffer, args)
+            # replay_memory[key] = replay_memory
 
-            if len(replay_buffer) > args.batch_size:
-                transitions = replay_buffer.sample(args.batch_size)
-                batch = replay_memory.Transition(*zip(*transitions))
-                replay_queue.put(batch)
+            # if len(replay_buffer) > args.batch_size:
+            #     transitions = replay_buffer.sample(args.batch_size)
+            #     batch = replay_memory.Transition(*zip(*transitions))
+            #     replay_queue.put(batch)
         state = next_state
     dict_all_returns[key] = (total_reward, num_frames)
     # num_frames_list.append(num_frames)
@@ -146,10 +148,11 @@ class Agent:
         self.ounoise = ddpg.OUNoise(args.action_dim)
         self.replay_queue = mp.Manager().Queue()  # mp.Manager().list()
         # self.replay_queue = mp.Queue()
+        self.replay_memory = mp.Manager.dict()
 
         self.workers = self.pop.append(self.rl_agent.actor)
 
-        self.learner = LearnerThread(self.replay_queue, self.rl_agent)
+        self.learner = LearnerThread(self.replay_memory, self.rl_agent)
         self.learner.start()
         # Stats
         # self.timers = {
@@ -177,7 +180,6 @@ class Agent:
         dict_all_returns = mp.Manager().dict()
         num_frames = mp.Manager().list()
 
-
         # print(len(d))
         # print(len(q))
         # learner = LearnerThread(replay_queue)
@@ -185,9 +187,10 @@ class Agent:
 
         time_start = time.time()
         for key, pop in enumerate(self.pop):
+            self.replay_memory[key] = replay_memory.ReplayMemory(self.args.buffer_size)
             pop.share_memory()
-            p = mp.Process(target=evaluate, args=(pop, self.args,
-                                                  self.replay_queue, dict_all_returns, key))
+            p = mp.Process(target=evaluate, args=(pop, self.args, self.replay_memory[key]
+                                                  , dict_all_returns, key))
             p.start()
             processes.append(p)
 
@@ -195,7 +198,7 @@ class Agent:
             p.join()
 
         # exit(0)
-        print("finished EA,time:",(time.time()-time_start))
+        print("finished EA,time:", (time.time()-time_start))
         exit(0)
 
 
