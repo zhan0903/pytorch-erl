@@ -94,8 +94,8 @@ def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=T
     state = env.reset()
     num_frames = 0
     state = utils.to_tensor(state).unsqueeze(0)
-    replay_buffer = replay_memory.ReplayMemory(args.buffer_size)
-    replay_memory[key] = replay_memory
+    # replay_buffer = replay_memory.ReplayMemory(args.buffer_size)
+    # replay_memory[key] = replay_memory
 
     if args.is_cuda: state = state.cuda()
     done = False
@@ -115,7 +115,7 @@ def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=T
         total_reward += reward
 
         if store_transition:
-            add_experience(state, action, next_state, reward, done, replay_buffer, args)
+            add_experience(state, action, next_state, reward, done, replay_memory, args)
             # replay_memory[key] = replay_memory
 
             # if len(replay_buffer) > args.batch_size:
@@ -291,7 +291,7 @@ class LearnerThread(threading.Thread):
     addition, moving heavyweight gradient ops session runs off the main thread
     improves overall throughput.
     """
-    def __init__(self, replay_queue, rl_agent):
+    def __init__(self, replay_memeory, rl_agent):
         threading.Thread.__init__(self)
         # self.learner_queue_size = WindowStat("size", 50)
         # self.local_evaluator = local_evaluator
@@ -304,7 +304,7 @@ class LearnerThread(threading.Thread):
         self.stopped = False
         self.stats = {}
         # self.replay_memory = replay_memory
-        self.replay_queue = replay_queue
+        self.replay_queue = replay_memory
         self.rl_agent = rl_agent
         self.steps = 0
         self.gen_frames = 1000
