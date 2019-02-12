@@ -231,7 +231,7 @@ class Agent:
         print("self.num_frames ", self.num_frames)
         print("steps", self.learner.steps)
 
-        print(self.replay_memory[:10])
+        print(self.replay_memory)
 
 
         # for i in range(self.args.pop_size):
