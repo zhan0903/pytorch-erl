@@ -325,6 +325,7 @@ class LearnerThread(threading.Thread):
         # print()
         print(self.replay_memory)
         key = random.randint(0,9)
+        print(self.replay_memory[key])
         if len(self.replay_memory[key]) > 0:
             transitions = self.replay_memory[key].sample(self.args.batch_size)
             batch = replay_memory.Transition(*zip(*transitions))
