@@ -222,12 +222,11 @@ class Agent:
         # print(all_fitness)
         print(processes)
         print(dict_all_returns)
-        all_fitness = list(dict_all_returns.values())
-        num_frames = list(dict_all_returns.values()[1])
+
+        all_fitness = [pair[0] for pair in list(dict_all_returns.values())]
+        self.num_frames = sum([pair[1] for pair in list(dict_all_returns.values())])
 
         print(all_fitness)
-        print(num_frames)
-        self.num_frames = sum(num_frames)
         print("self.num_frames ", self.num_frames)
         print("steps", self.learner.steps)
 
