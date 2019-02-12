@@ -222,8 +222,9 @@ class Agent:
         # print(all_fitness)
         print(processes)
         print(dict_all_returns)
-        all_fitness = list(dict_all_returns.values()[0])
+        all_fitness = list(dict_all_returns.values())
         num_frames = list(dict_all_returns.values()[1])
+
         print(all_fitness)
         print(num_frames)
         self.num_frames = sum(num_frames)
