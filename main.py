@@ -182,6 +182,7 @@ class Agent:
         # with mp.Manager() as manager:
         dict_all_returns = mp.Manager().dict()
         num_frames = mp.Manager().list()
+        print(self.replay_memory[:10])
 
         # print(len(d))
         # print(len(q))
