@@ -152,6 +152,9 @@ class Agent:
 
         self.workers = self.pop.append(self.rl_agent.actor)
 
+        for key in range(self.args.pop_size):
+            self.replay_memory[key] = replay_memory.ReplayMemory(self.args.buffer_size)
+
         self.learner = LearnerThread(self.replay_memory, self.rl_agent)
         self.learner.start()
         # Stats
@@ -187,7 +190,6 @@ class Agent:
 
         time_start = time.time()
         for key, pop in enumerate(self.pop):
-            self.replay_memory[key] = replay_memory.ReplayMemory(self.args.buffer_size)
             pop.share_memory()
             p = mp.Process(target=evaluate, args=(pop, self.args, self.replay_memory[key]
                                                   , dict_all_returns, key))
