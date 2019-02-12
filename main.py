@@ -282,6 +282,7 @@ class Agent:
             print('Synch from RL --> Nevo')
 
         # print("test_timer:{}".format(test_timer.mean))
+        time.sleep(100)
 
         return best_train_fitness, test_score, elite_index
 
