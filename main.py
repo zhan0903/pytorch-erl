@@ -325,8 +325,9 @@ class LearnerThread(threading.Thread):
         #     # time.sleep(1)
         # if self.steps <= self.gen_frames:
         # print()
-        print(self.replay_memory)
+        # print(self.replay_memory)
         key = random.randint(0,9)
+        print("key,",key)
         print(self.replay_memory[key])
         if len(self.replay_memory[key]) > 0:
             transitions = self.replay_memory[key].sample(self.args.batch_size)
