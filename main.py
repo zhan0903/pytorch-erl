@@ -331,6 +331,7 @@ class LearnerThread(threading.Thread):
         print(self.replay_memory[key])
         print(len(self.replay_memory))
         if len(self.replay_memory[key]) > 0:
+            print("begin rl training")
             transitions = self.replay_memory[key].sample(self.args.batch_size)
 
 
