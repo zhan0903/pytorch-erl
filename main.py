@@ -201,7 +201,7 @@ class Agent:
 
         # exit(0)
         print("finished EA,time:", (time.time()-time_start))
-        exit(0)
+        # exit(0)
 
 
         ####################### EVOLUTION #####################
@@ -254,7 +254,7 @@ class Agent:
         # (net, env, args, replay_queue, dict_all_fitness, num_frames_list, key, store_transition=True)
         for _ in range(5):
             p = mp.Process(target=evaluate, args=(self.pop[champ_index], self.args,
-                                                  self.replay_queue,test_return,champ_index,False))
+                                                  None,test_return,champ_index,False))
             p.start()
             processes.append(p)
 
@@ -264,7 +264,7 @@ class Agent:
         # test_score = sum(test_fitness)/5.0
         # print("test_score,",test_score)
         print("test_return,",test_return)
-        exit(0)
+        # exit(0)
         test_score = sum(list(test_return.values()[0])) / 5.0
 
         # NeuroEvolution's probabilistic selection and recombination step
