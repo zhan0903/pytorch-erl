@@ -291,7 +291,7 @@ class LearnerThread(threading.Thread):
     addition, moving heavyweight gradient ops session runs off the main thread
     improves overall throughput.
     """
-    def __init__(self, replay_memeory, rl_agent):
+    def __init__(self, replay_memory, rl_agent):
         threading.Thread.__init__(self)
         # self.learner_queue_size = WindowStat("size", 50)
         # self.local_evaluator = local_evaluator
@@ -304,7 +304,7 @@ class LearnerThread(threading.Thread):
         self.stopped = False
         self.stats = {}
         # self.replay_memory = replay_memory
-        self.replay_queue = replay_memory
+        self.replay_memory = replay_memory
         self.rl_agent = rl_agent
         self.steps = 0
         self.gen_frames = 1000
@@ -323,18 +323,24 @@ class LearnerThread(threading.Thread):
         #     # time.sleep(1)
         # if self.steps <= self.gen_frames:
         # print()
-        print(self.replay_queue)
+        print(self.replay_memory)
+        key = random.randint(0,9)
+        if len(self.replay_memory[key]) > 0:
+            transitions = self.replay_memory[key].sample(self.args.batch_size)
+            batch = replay_memory.Transition(*zip(*transitions))
+            self.rl_agent.update_parameters(batch)
+            self.steps += 1
 
         # print(self.replay_queue.qsize())
-        time.sleep(1)
-        if not self.replay_queue.empty():
-            # print("come inside")
-            print(self.replay_queue.qsize())
-        #     print("replay_queue,", self.replay_queue)
-            batch = self.replay_queue.get()
-            print("batch,", batch)
-        #     self.rl_agent.update_parameters(batch)
-        #     self.steps += 1
+        # time.sleep(1)
+        # if not self.replay_queue.empty():
+        #     # print("come inside")
+        #     print(self.replay_queue.qsize())
+        # #     print("replay_queue,", self.replay_queue)
+        #     batch = self.replay_queue.get()
+        #     print("batch,", batch)
+        # #     self.rl_agent.update_parameters(batch)
+        # #     self.steps += 1
         # else:
         #     self.stopped = True
 
