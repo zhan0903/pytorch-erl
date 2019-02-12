@@ -187,7 +187,6 @@ class Agent:
         # print(len(q))
         # learner = LearnerThread(replay_queue)
         # learner.start()
-
         time_start = time.time()
         for key, pop in enumerate(self.pop):
             pop.share_memory()
