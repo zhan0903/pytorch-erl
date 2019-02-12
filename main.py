@@ -230,6 +230,8 @@ class Agent:
         print("self.num_frames ", self.num_frames)
         print("steps", self.learner.steps)
 
+        print(self.replay_memory[:10])
+
 
         # for i in range(self.args.pop_size):
         #     all_fitness.append(results_ea[i][0])
