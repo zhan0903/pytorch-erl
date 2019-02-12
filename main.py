@@ -83,9 +83,9 @@ def add_experience(state, action, next_state, reward, done, replay_buffer, args)
         if args.is_cuda: done = done.cuda()
     action = utils.to_tensor(action)
     if args.is_cuda: action = action.cuda()
-    # replay_buffer.appendpend((state, action, next_state, reward, done))
+    replay_buffer.append((state, action, next_state, reward, done))
     # replay_queue.put((state, action, next_state, reward, done))
-    replay_buffer.push(state, action, next_state, reward, done)
+    # replay_buffer.push(state, action, next_state, reward, done)
 
 
 def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=True):
@@ -146,7 +146,7 @@ class Agent:
         # self.rl_agent.share_memory()
 
         self.ounoise = ddpg.OUNoise(args.action_dim)
-        self.replay_queue = mp.Manager().Queue()  # mp.Manager().list()
+        # self.replay_queue = mp.Manager().Queue()  # mp.Manager().list()
         # self.replay_queue = mp.Queue()
         self.replay_memory = mp.Manager().dict()
 
@@ -191,7 +191,7 @@ class Agent:
         time_start = time.time()
         for key, pop in enumerate(self.pop):
             pop.share_memory()
-            p = mp.Process(target=evaluate, args=(pop, self.args, self.replay_memory[key]
+            p = mp.Process(target=evaluate, args=(pop, self.args, self.replay_memory
                                                   , dict_all_returns, key))
             p.start()
             processes.append(p)
