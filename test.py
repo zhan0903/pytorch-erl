@@ -20,6 +20,19 @@ env_tag = vars(parser.parse_args())['env']
 # def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=True):
 #     replay_memory.put(1)
 #
+def add_experience(state, action, next_state, reward, done, args):
+    reward = utils.to_tensor(np.array([reward])).unsqueeze(0)
+    if args.is_cuda: reward = reward.cuda()
+    if args.use_done_mask:
+        done = utils.to_tensor(np.array([done]).astype('uint8')).unsqueeze(0)
+        if args.is_cuda: done = done.cuda()
+    action = utils.to_tensor(action)
+    if args.is_cuda: action = action.cuda()
+    # replay_buffer.append(state, action, next_state, reward, done)
+    # replay_queue.put((state, action, next_state, reward, done))
+    # print("before put")
+    return state, action, next_state, reward, done
+
 
 def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=True):
     total_reward = 0.0
@@ -48,7 +61,7 @@ def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=T
         total_reward += reward
 
         if store_transition:
-            replay_memory.put(state, action, next_state, reward, done)
+            replay_memory.put(add_experience(state, action, next_state, reward, done))
             # replay_memory[key] = replay_memory
 
             # if len(replay_buffer) > args.batch_size:

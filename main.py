@@ -75,7 +75,7 @@ class Parameters:
 original = False
 
 
-def add_experience(state, action, next_state, reward, done, replay_buffer, args):
+def add_experience(state, action, next_state, reward, done,args):
     reward = utils.to_tensor(np.array([reward])).unsqueeze(0)
     if args.is_cuda: reward = reward.cuda()
     if args.use_done_mask:
@@ -86,7 +86,9 @@ def add_experience(state, action, next_state, reward, done, replay_buffer, args)
     # replay_buffer.append(state, action, next_state, reward, done)
     # replay_queue.put((state, action, next_state, reward, done))
     # print("before put")
-    replay_buffer.put_nowait((state, action, next_state, reward, done))
+
+    return state, action, next_state, reward, done
+    # replay_buffer.put_nowait((state, action, next_state, reward, done))
 
 
 def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=True):
