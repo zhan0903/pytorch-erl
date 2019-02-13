@@ -120,6 +120,48 @@ class Parameters:
         if not os.path.exists(self.save_foldername): os.makedirs(self.save_foldername)
 
 
+class LearnerThread(threading.Thread):
+    """Background thread that updates the local model from replay data.
+    The learner thread communicates with the main thread through Queues. This
+    is needed since Ray operations can only be run on the main thread. In
+    addition, moving heavyweight gradient ops session runs off the main thread
+    improves overall throughput.
+    """
+
+    def __init__(self, replay_memory):
+        threading.Thread.__init__(self)
+        # self.learner_queue_size = WindowStat("size", 50)
+        # self.local_evaluator = local_evaluator
+        # self.inqueue = queue.Queue(maxsize=LEARNER_QUEUE_MAX_SIZE)
+        # self.outqueue = queue.Queue()
+        # self.queue_timer = TimerStat()
+        # self.grad_timer = TimerStat()
+        self.daemon = True
+        self.weights_updated = False
+        self.stopped = False
+        self.stats = {}
+        # self.replay_memory = replay_memory
+        self.replay_memory = replay_memory
+        # self.rl_agent = rl_agent
+        self.steps = 0
+        self.gen_frames = 1000
+
+    def run(self):
+        while not self.stopped:
+            self.step()
+        # return self.rl_agent
+
+    def step(self):
+        # if not self.replay_queue.empty()  and :
+        #     print("begin background training")
+        #     print("self.replay_queue.qsize", self.replay_queue.qsize())
+        #     print(self.replay_queue.get())
+        #     print("self.replay_queue.qsize", self.replay_queue.qsize())
+        #     # time.sleep(1)
+        # if self.steps <= self.gen_frames:
+        # print()
+        # print(self.replay_memory)
+        batch = self.replay_memory.get()
 
 
 if __name__ == "__main__":
@@ -127,6 +169,9 @@ if __name__ == "__main__":
     env = utils.NormalizedActions(gym.make(env_tag))
     args.action_dim = env.action_space.shape[0]
     args.state_dim = env.observation_space.shape[0]
+
+    # learner = LearnerThread(replay_memory)
+    # learner.start()
 
     pop = []
     for _ in range(1):
@@ -136,6 +181,9 @@ if __name__ == "__main__":
     mp.set_start_method('spawn')
 
     replay_memory = mp.Queue()
+
+    learner = LearnerThread(replay_memory)
+    learner.start()
     # dict_all_returns = mp.Manager().dict()
     processes = []
 
@@ -159,46 +207,3 @@ if __name__ == "__main__":
     print("finished EA,time:", (time.time() - time_start))
     print(replay_memory)
     # exit(0)
-
-class LearnerThread(threading.Thread):
-    """Background thread that updates the local model from replay data.
-    The learner thread communicates with the main thread through Queues. This
-    is needed since Ray operations can only be run on the main thread. In
-    addition, moving heavyweight gradient ops session runs off the main thread
-    improves overall throughput.
-    """
-    def __init__(self, replay_memory, rl_agent):
-        threading.Thread.__init__(self)
-        # self.learner_queue_size = WindowStat("size", 50)
-        # self.local_evaluator = local_evaluator
-        # self.inqueue = queue.Queue(maxsize=LEARNER_QUEUE_MAX_SIZE)
-        # self.outqueue = queue.Queue()
-        # self.queue_timer = TimerStat()
-        # self.grad_timer = TimerStat()
-        self.daemon = True
-        self.weights_updated = False
-        self.stopped = False
-        self.stats = {}
-        # self.replay_memory = replay_memory
-        self.replay_memory = replay_memory
-        self.rl_agent = rl_agent
-        self.steps = 0
-        self.gen_frames = 1000
-
-    def run(self):
-        while not self.stopped:
-            self.step()
-        # return self.rl_agent
-
-    def step(self):
-        # if not self.replay_queue.empty()  and :
-        #     print("begin background training")
-        #     print("self.replay_queue.qsize", self.replay_queue.qsize())
-        #     print(self.replay_queue.get())
-        #     print("self.replay_queue.qsize", self.replay_queue.qsize())
-        #     # time.sleep(1)
-        # if self.steps <= self.gen_frames:
-        # print()
-        # print(self.replay_memory)
-        batch = self.replay_memory.get()
-        print(batch)
