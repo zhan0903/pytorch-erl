@@ -31,7 +31,7 @@ def add_experience(state, action, next_state, reward, done, args):
     # replay_buffer.append(state, action, next_state, reward, done)
     # replay_queue.put((state, action, next_state, reward, done))
     # print("before put")
-    return state, action, next_state, reward, done
+    return (state, action, next_state, reward, done)
 
 
 def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=True):
@@ -132,7 +132,7 @@ if __name__ == "__main__":
 
     mp.set_start_method('spawn')
 
-    replay_memory = mp.Queue(10000000)
+    replay_memory = mp.Queue()
     # dict_all_returns = mp.Manager().dict()
     processes = []
 
