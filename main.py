@@ -235,7 +235,7 @@ class Agent:
 
         print(self.replay_memory)
         print(type(self.replay_memory))
-        print(random.sample(self.replay_memory, 10))
+        print(random.sample(list(self.replay_memory), 10))
 
 
         # for i in range(self.args.pop_size):
