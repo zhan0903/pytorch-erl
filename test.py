@@ -161,7 +161,7 @@ class LearnerThread(threading.Thread):
         # if self.steps <= self.gen_frames:
         # print()
         # print(self.replay_memory)
-        batch = self.replay_memory.get()
+        print(self.replay_memory.get())
 
 
 if __name__ == "__main__":
