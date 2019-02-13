@@ -151,7 +151,7 @@ class Agent:
         # self.replay_queue = mp.Queue()
         # self.replay_memory = mp.Manager().list()
         # self.replay_memory = mp.Array()
-        self.replay_memory = mp.Queue()
+        self.replay_memory = mp.SimpleQueue()
 
 
 
