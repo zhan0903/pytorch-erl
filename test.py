@@ -62,7 +62,7 @@ def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=T
 
         if store_transition:
             # print(add_experience(state, action, next_state, reward, done,args))
-            replay_memory.put_nowait(add_experience(state, action, next_state, reward, done,args))
+            replay_memory.put(add_experience(state, action, next_state, reward, done,args))
             print("dfadfasfdsf")
             print("done:",done)
             # replay_memory[key] = replay_memory
