@@ -85,7 +85,7 @@ def add_experience(state, action, next_state, reward, done, replay_buffer, args)
     if args.is_cuda: action = action.cuda()
     # replay_buffer.append(state, action, next_state, reward, done)
     # replay_queue.put((state, action, next_state, reward, done))
-    replay_buffer.put((state, action, next_state, reward, done))
+    replay_buffer.put_nowait((state, action, next_state, reward, done))
 
 
 def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=True):
