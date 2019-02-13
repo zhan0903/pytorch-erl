@@ -343,7 +343,8 @@ class LearnerThread(threading.Thread):
         # if self.steps <= self.gen_frames:
         # print()
         # print(self.replay_memory)
-        self.replay_memory.get()
+        batch = self.replay_memory.get()
+        print(batch)
 
         # key = random.randint(0,9)
         # print("key,",key)
