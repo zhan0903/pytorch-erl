@@ -144,7 +144,6 @@ class LearnerThread(threading.Thread):
         self.replay_memory = replay_memory
         # self.rl_agent = rl_agent
         self.steps = 0
-        self.gen_frames = 1000
 
     def run(self):
         while not self.stopped:
@@ -162,6 +161,7 @@ class LearnerThread(threading.Thread):
         # print()
         if not self.replay_memory.empty():
             print(self.replay_memory.qsize())
+            time.time(1)
             # print(self.replay_memory.get())
 
 
