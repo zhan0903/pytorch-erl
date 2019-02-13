@@ -234,6 +234,7 @@ class Agent:
         print(all_fitness)
         print("self.num_frames ", self.num_frames)
         print("steps", self.learner.steps)
+        time.sleep(100)
 
         print(self.replay_memory.qsize())
         print(type(self.replay_memory))
