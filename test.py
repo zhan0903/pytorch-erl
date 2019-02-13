@@ -149,6 +149,7 @@ if __name__ == "__main__":
 
     for p in processes:
         print("p",p)
+        print(replay_memory.get())
         p.join()
         print("p2",p)
 
