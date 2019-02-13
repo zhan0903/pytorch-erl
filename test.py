@@ -118,35 +118,35 @@ class Parameters:
 
 
 
+if __name__ == "__main__":
+    args = Parameters()
+    env = utils.NormalizedActions(gym.make(env_tag))
+    args.action_dim = env.action_space.shape[0]
+    args.state_dim = env.observation_space.shape[0]
 
-args = Parameters()
-env = utils.NormalizedActions(gym.make(env_tag))
-args.action_dim = env.action_space.shape[0]
-args.state_dim = env.observation_space.shape[0]
+    pop = []
+    for _ in range(10):
+        pop.append(ddpg.Actor(args))
+    for actor in pop: actor.eval()
 
-pop = []
-for _ in range(10):
-    pop.append(ddpg.Actor(args))
-for actor in pop: actor.eval()
+    mp.set_start_method('spawn')
 
-mp.set_start_method('spawn')
+    replay_memory = mp.Queue()
+    # dict_all_returns = mp.Manager().dict()
+    processes = []
 
-replay_memory = mp.Queue()
-# dict_all_returns = mp.Manager().dict()
-processes = []
+    time_start = time.time()
+    for key, pop in enumerate(pop):
+        pop.share_memory()
+        p = mp.Process(target=evaluate, args=(pop, args, replay_memory
+                                              , None, key))
+        p.start()
+        processes.append(p)
 
-time_start = time.time()
-for key, pop in enumerate(pop):
-    pop.share_memory()
-    p = mp.Process(target=evaluate, args=(pop, args, replay_memory
-                                          , None, key))
-    p.start()
-    processes.append(p)
+    for p in processes:
+        p.join()
 
-for p in processes:
-    p.join()
-
-# exit(0)
-print("finished EA,time:", (time.time() - time_start))
-print(replay_memory)
-# exit(0)
+    # exit(0)
+    print("finished EA,time:", (time.time() - time_start))
+    print(replay_memory)
+    # exit(0)
