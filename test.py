@@ -162,7 +162,7 @@ class LearnerThread(threading.Thread):
         if not self.replay_memory.empty():
             print(self.replay_memory.qsize())
             time.sleep(1)
-            print(self.replay_memory.get())
+            print(self.replay_memory.get_nowait())
 
 
 if __name__ == "__main__":
