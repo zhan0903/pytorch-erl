@@ -132,7 +132,7 @@ if __name__ == "__main__":
 
     mp.set_start_method('spawn')
 
-    replay_memory = mp.Queue()
+    replay_memory = mp.Queue(10000000)
     # dict_all_returns = mp.Manager().dict()
     processes = []
 
