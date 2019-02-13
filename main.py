@@ -130,6 +130,7 @@ def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=T
 
     # fitness.append(total_reward)
 
+replay_memory = mp.Queue()
 
 class Agent:
     def __init__(self, args, env):
@@ -188,7 +189,7 @@ class Agent:
         # with mp.Manager() as manager:
         dict_all_returns = mp.Manager().dict()
         num_frames = mp.Manager().list()
-        print(self.replay_memory)
+        print(replay_memory)
 
         # print(len(d))
         # print(len(q))
@@ -197,7 +198,7 @@ class Agent:
         time_start = time.time()
         for key, pop in enumerate(self.pop):
             pop.share_memory()
-            p = mp.Process(target=evaluate, args=(pop, self.args, self.replay_memory
+            p = mp.Process(target=evaluate, args=(pop, self.args, replay_memory
                                                   , dict_all_returns, key))
             p.start()
             processes.append(p)
@@ -240,7 +241,7 @@ class Agent:
         print("steps", self.learner.steps)
         time.sleep(100)
 
-        print(self.replay_memory.qsize())
+        print(replay_memory.qsize())
         print(type(self.replay_memory))
         print(self.replay_memory.get())
         # print(random.sample(list(self.replay_memory), 10))
