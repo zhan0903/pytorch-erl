@@ -5,13 +5,20 @@ import numpy as np, os, time, sys, random
 from core import mod_neuro_evo as utils_ne
 from core import mod_utils as utils
 import gym, torch
+import argparse
 
+
+
+
+render = False
+parser = argparse.ArgumentParser()
+parser.add_argument('-env', help='Environment Choices: (HalfCheetah-v2) (Ant-v2) (Reacher-v2) (Walker2d-v2) (Swimmer-v2) (Hopper-v2)', required=True)
+env_tag = vars(parser.parse_args())['env']
 
 
 
 def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=True):
     replay_memory.put(1)
-
 
 
 class Parameters:
