@@ -234,6 +234,7 @@ class Agent:
         print("steps", self.learner.steps)
 
         print(self.replay_memory)
+        print(type(self.replay_memory))
         print(random.sample(self.replay_memory, 10))
 
 
