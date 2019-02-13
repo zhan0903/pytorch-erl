@@ -184,7 +184,7 @@ if __name__ == "__main__":
     replay_memory = mp.Queue()
 
     learner = LearnerThread(replay_memory)
-    learner.start()
+    # learner.start()
     # dict_all_returns = mp.Manager().dict()
     processes = []
 
