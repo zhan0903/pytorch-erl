@@ -73,6 +73,7 @@ def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=T
             #     replay_queue.put(batch)
         state = next_state
     print("done!!!!!:", done)
+    replay_memory.close()
 
 
 class Parameters:
