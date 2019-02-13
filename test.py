@@ -31,7 +31,7 @@ def add_experience(state, action, next_state, reward, done, args):
     # replay_buffer.append(state, action, next_state, reward, done)
     # replay_queue.put((state, action, next_state, reward, done))
     # print("before put")
-    return (state, action, next_state, reward, done)
+    return state #(state, action, next_state, reward, done)
 
 
 def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=True):
@@ -73,8 +73,8 @@ def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=T
             #     replay_queue.put(batch)
         state = next_state
     print("done!!!!!:", done)
-    replay_memory.close()
-    replay_memory.cancel_join_thread()
+    # replay_memory.close()
+    # replay_memory.cancel_join_thread()
 
 
 class Parameters:
@@ -173,9 +173,6 @@ if __name__ == "__main__":
     args.action_dim = env.action_space.shape[0]
     args.state_dim = env.observation_space.shape[0]
 
-    # learner = LearnerThread(replay_memory)
-    # learner.start()
-
     pop = []
     for _ in range(1):
         pop.append(ddpg.Actor(args))
@@ -186,7 +183,7 @@ if __name__ == "__main__":
     replay_memory = mp.Queue()
 
     learner = LearnerThread(replay_memory)
-    # learner.start()
+    learner.start()
     # dict_all_returns = mp.Manager().dict()
     processes = []
 
