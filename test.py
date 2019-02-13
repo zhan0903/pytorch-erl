@@ -116,6 +116,9 @@ class Parameters:
         if not os.path.exists(self.save_foldername): os.makedirs(self.save_foldername)
 
 
+
+
+mp.set_start_method('spawn')
 args = Parameters()
 env = utils.NormalizedActions(gym.make(env_tag))
 args.action_dim = env.action_space.shape[0]
