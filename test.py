@@ -1,4 +1,4 @@
-import multiprocessing as mp
+import torch.multiprocessing as mp
 import time
 from core import ddpg as ddpg
 import numpy as np, os, time, sys, random
