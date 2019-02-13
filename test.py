@@ -161,7 +161,7 @@ class LearnerThread(threading.Thread):
         # print()
         if not self.replay_memory.empty():
             print(self.replay_memory.qsize())
-            time.time(1)
+            time.sleep(1)
             # print(self.replay_memory.get())
 
 
