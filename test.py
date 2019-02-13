@@ -61,6 +61,7 @@ def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=T
         total_reward += reward
 
         if store_transition:
+            print(add_experience(state, action, next_state, reward, done,args))
             replay_memory.put(add_experience(state, action, next_state, reward, done,args))
             # replay_memory[key] = replay_memory
 
