@@ -53,4 +53,5 @@ for p in processes:
 
 # exit(0)
 print("finished EA,time:", (time.time() - time_start))
+print(replay_memory)
 # exit(0)
