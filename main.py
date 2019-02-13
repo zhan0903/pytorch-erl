@@ -37,7 +37,7 @@ class Parameters:
         else: self.num_frames = 2000000
 
         #USE CUDA
-        self.is_cuda = False; self.is_memory_cuda = True
+        self.is_cuda = True; self.is_memory_cuda = True
 
         #Sunchronization Period
         if env_tag == 'Hopper-v2' or env_tag == 'Ant-v2': self.synch_period = 1
@@ -161,7 +161,7 @@ class Agent:
         #     self.replay_memory[key] = replay_memory.ReplayMemory(self.args.buffer_size)
 
         self.learner = LearnerThread(self.replay_memory, self.rl_agent)
-        # self.learner.start()
+        self.learner.start()
         # Stats
         # self.timers = {
         #     k: TimerStat()
@@ -343,14 +343,16 @@ class LearnerThread(threading.Thread):
         # if self.steps <= self.gen_frames:
         # print()
         # print(self.replay_memory)
-        key = random.randint(0,9)
-        print("key,",key)
-        # print(self.replay_memory[key])
-        print("len of relay_meomroy,", len(self.replay_memory))
-        if len(self.replay_memory[key]) > 0:
-            print("begin rl training")
-            transitions = self.replay_memory[key].sample(self.args.batch_size)
+        self.replay_memory.get()
 
+        # key = random.randint(0,9)
+        # print("key,",key)
+        # # print(self.replay_memory[key])
+        # print("len of relay_meomroy,", len(self.replay_memory))
+        # if len(self.replay_memory[key]) > 0:
+        #     print("begin rl training")
+        #     transitions = self.replay_memory[key].sample(self.args.batch_size)
+        #
 
             # batch = replay_memory.Transition(*zip(*transitions))
             # self.rl_agent.update_parameters(batch)
