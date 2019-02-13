@@ -195,11 +195,12 @@ if __name__ == "__main__":
                                               , None, key))
         p.daemon = True
         p.start()
+        p.join()
         processes.append(p)
 
     for p in processes:
         print("p",p)
-        print(replay_memory.get())
+        # print(replay_memory.get())
         p.join()
         print("p2",p)
 
