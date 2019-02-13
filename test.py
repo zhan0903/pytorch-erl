@@ -148,6 +148,7 @@ if __name__ == "__main__":
         processes.append(p)
 
     for p in processes:
+        print("p",p)
         p.join()
 
     # exit(0)
