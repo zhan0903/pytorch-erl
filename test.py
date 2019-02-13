@@ -118,7 +118,7 @@ class Parameters:
 
 
 
-mp.set_start_method('spawn')
+
 args = Parameters()
 env = utils.NormalizedActions(gym.make(env_tag))
 args.action_dim = env.action_space.shape[0]
@@ -129,7 +129,7 @@ for _ in range(10):
     pop.append(ddpg.Actor(args))
 for actor in pop: actor.eval()
 
-
+mp.set_start_method('spawn')
 
 replay_memory = mp.Queue()
 # dict_all_returns = mp.Manager().dict()
@@ -137,13 +137,11 @@ processes = []
 
 time_start = time.time()
 for key, pop in enumerate(pop):
-    pop.share_memory()
+    pop.share_memory_()
     p = mp.Process(target=evaluate, args=(pop, args, replay_memory
                                           , None, key))
     p.start()
     processes.append(p)
-    # time.sleep(10)
-    # print(self.replay_memory.get())
 
 for p in processes:
     p.join()
