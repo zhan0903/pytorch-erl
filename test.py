@@ -67,6 +67,10 @@ class Parameters:
 
 
 args = Parameters()
+env = utils.NormalizedActions(gym.make(env_tag))
+args.action_dim = env.action_space.shape[0]
+args.state_dim = env.observation_space.shape[0]
+
 pop = []
 for _ in range(10):
     pop.append(ddpg.Actor(args))
