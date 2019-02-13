@@ -202,8 +202,7 @@ class Agent:
             processes.append(p)
 
 
-
-            time.sleep(3)
+            time.sleep(10)
             print(self.replay_memory.get())
 
         for p in processes:
