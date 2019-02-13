@@ -124,6 +124,7 @@ def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=T
             #     replay_queue.put(batch)
         state = next_state
     dict_all_returns[key] = (total_reward, num_frames)
+    time.sleep(100)
     # num_frames_list.append(num_frames)
 
     # fitness.append(total_reward)
@@ -200,6 +201,11 @@ class Agent:
             p.start()
             processes.append(p)
 
+
+
+            time.sleep(3)
+            print(self.replay_memory.get())
+
         for p in processes:
             p.join()
 
@@ -267,6 +273,9 @@ class Agent:
                                                   None,test_return,champ_index,False))
             p.start()
             processes.append(p)
+
+
+            time.sleep(2)
 
         for p in processes:
             p.join()
