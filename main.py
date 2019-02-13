@@ -148,8 +148,8 @@ class Agent:
         self.ounoise = ddpg.OUNoise(args.action_dim)
         # self.replay_queue = mp.Manager().Queue()  # mp.Manager().list()
         # self.replay_queue = mp.Queue()
-        # self.replay_memory = mp.Manager().list()
-        self.replay_memory = mp.Array()
+        self.replay_memory = mp.Manager().list()
+        # self.replay_memory = mp.Array()
 
 
         self.workers = self.pop.append(self.rl_agent.actor)
@@ -234,6 +234,7 @@ class Agent:
         print("steps", self.learner.steps)
 
         print(len(self.replay_memory))
+        print(random.sample(self.replay_memory, 10))
 
 
         # for i in range(self.args.pop_size):
