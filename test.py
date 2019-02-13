@@ -132,14 +132,14 @@ for actor in pop: actor.eval()
 
 
 replay_memory = mp.Queue()
-dict_all_returns = mp.Manager().dict()
+# dict_all_returns = mp.Manager().dict()
 processes = []
 
 time_start = time.time()
 for key, pop in enumerate(pop):
     pop.share_memory()
     p = mp.Process(target=evaluate, args=(pop, args, replay_memory
-                                          , dict_all_returns, key))
+                                          , None, key))
     p.start()
     processes.append(p)
     # time.sleep(10)
