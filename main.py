@@ -5,7 +5,7 @@ import gym, torch
 from core import replay_memory
 from core import ddpg as ddpg
 import argparse
-import multiprocessing as mp
+import torch.multiprocessing as mp
 import time
 import logging
 import copy
