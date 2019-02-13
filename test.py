@@ -160,7 +160,8 @@ class LearnerThread(threading.Thread):
         #     # time.sleep(1)
         # if self.steps <= self.gen_frames:
         # print()
-        # print(self.replay_memory)
+        print(self.replay_memory.qsize())
+
         print(self.replay_memory.get())
 
 
