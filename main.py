@@ -235,8 +235,9 @@ class Agent:
         print("self.num_frames ", self.num_frames)
         print("steps", self.learner.steps)
 
-        print(self.replay_memory)
+        print(self.replay_memory.qsize())
         print(type(self.replay_memory))
+        print(self.replay_memory.get())
         # print(random.sample(list(self.replay_memory), 10))
 
 
