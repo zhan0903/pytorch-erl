@@ -130,8 +130,6 @@ def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=T
 
     # fitness.append(total_reward)
 
-replay_memory = mp.Queue()
-
 class Agent:
     def __init__(self, args, env):
         self.args = args
@@ -182,7 +180,7 @@ class Agent:
         for target_param, param in zip(evo_net.parameters(), rl_net.parameters()):
             target_param.data.copy_(param.data)
 
-    def train(self):
+    def train(self,replay_memory):
         print("begin training")
         # replay_queue = mp.Queue()
         processes = []
@@ -426,13 +424,14 @@ if __name__ == "__main__":
     #Create Agent
     # ray.init()
     # print(torch.cuda.device_count())
+    replay_memory = mp.Queue()
 
     agent = Agent(parameters, env)
     print('Running', env_tag, ' State_dim:', parameters.state_dim, ' Action_dim:', parameters.action_dim)
 
     next_save = 100; time_start = time.time()
     while agent.num_frames <= parameters.num_frames:
-        best_train_fitness, erl_score, elite_index = agent.train()
+        best_train_fitness, erl_score, elite_index = agent.train(replay_memory)
         print('#Games:', agent.num_games, '#Frames:', agent.num_frames, ' Epoch_Max:', '%.2f'%best_train_fitness if best_train_fitness != None else None, ' Test_Score:','%.2f'%erl_score if erl_score != None else None, ' Avg:','%.2f'%tracker.all_tracker[0][1], 'ENV '+env_tag)
         print('RL Selection Rate: Elite/Selected/Discarded', '%.2f'%(agent.evolver.selection_stats['elite']/agent.evolver.selection_stats['total']),
                                                              '%.2f' % (agent.evolver.selection_stats['selected'] / agent.evolver.selection_stats['total']),
