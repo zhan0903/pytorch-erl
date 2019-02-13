@@ -17,8 +17,45 @@ env_tag = vars(parser.parse_args())['env']
 
 
 
+# def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=True):
+#     replay_memory.put(1)
+#
+
 def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=True):
-    replay_memory.put(1)
+    total_reward = 0.0
+    env = utils.NormalizedActions(gym.make(env_tag))
+    state = env.reset()
+    num_frames = 0
+    state = utils.to_tensor(state).unsqueeze(0)
+    # replay_buffer = replay_memory.ReplayMemory(args.buffer_size)
+    # replay_memory[key] = replay_memory
+
+    if args.is_cuda: state = state.cuda()
+    done = False
+    while not done:
+        if store_transition: num_frames += 1
+        # if render and is_render: env.render()
+        action = net.forward(state)
+        action.clamp(-1, 1)
+        action = utils.to_numpy(action.cpu())
+        # if is_action_noise: action += self.ounoise.noise()
+        # print("1")
+
+        next_state, reward, done, info = env.step(action.flatten())  # Simulate one step in environment
+        next_state = utils.to_tensor(next_state).unsqueeze(0)
+        if args.is_cuda:
+            next_state = next_state.cuda()
+        total_reward += reward
+
+        if store_transition:
+            replay_memory.put(state, action, next_state, reward, done)
+            # replay_memory[key] = replay_memory
+
+            # if len(replay_buffer) > args.batch_size:
+            #     transitions = replay_buffer.sample(args.batch_size)
+            #     batch = replay_memory.Transition(*zip(*transitions))
+            #     replay_queue.put(batch)
+        state = next_state
 
 
 class Parameters:
