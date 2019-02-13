@@ -125,7 +125,7 @@ if __name__ == "__main__":
     args.state_dim = env.observation_space.shape[0]
 
     pop = []
-    for _ in range(10):
+    for _ in range(1):
         pop.append(ddpg.Actor(args))
     for actor in pop: actor.eval()
 
