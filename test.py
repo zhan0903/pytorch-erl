@@ -74,6 +74,7 @@ def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=T
         state = next_state
     print("done!!!!!:", done)
     replay_memory.close()
+    replay_memory.join_thread()
 
 
 class Parameters:
