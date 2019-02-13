@@ -137,7 +137,7 @@ processes = []
 
 time_start = time.time()
 for key, pop in enumerate(pop):
-    pop.share_memory_()
+    pop.share_memory()
     p = mp.Process(target=evaluate, args=(pop, args, replay_memory
                                           , None, key))
     p.start()
