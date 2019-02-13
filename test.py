@@ -150,6 +150,8 @@ if __name__ == "__main__":
     for p in processes:
         print("p",p)
         p.join()
+        print("p2",p)
+
 
     # exit(0)
     print("finished EA,time:", (time.time() - time_start))
