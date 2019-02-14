@@ -212,7 +212,7 @@ class Agent:
         print("finished EA,time:", (time.time()-time_start))
 
 
-        print("replay_memory", replay_memory)
+        print("replay_memory", replay_memory[1])
         print("len replay_memory,",len(replay_memory))
         print("type replay_memory,",type(replay_memory))
 
@@ -248,9 +248,10 @@ class Agent:
         print(all_fitness)
         print("self.num_frames ", self.num_frames)
         # print("steps", self.learner.steps)
-        time.sleep(100)
+        # time.sleep(100)
+        exit(0)
 
-        print(replay_memory.qsize())
+        # print(replay_memory.qsize())
         # print(type(self.replay_memory))
         # print(self.replay_memory.get())
         # print(random.sample(list(self.replay_memory), 10))
