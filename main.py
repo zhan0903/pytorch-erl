@@ -213,6 +213,10 @@ class Agent:
 
 
         print("replay_memory", replay_memory)
+        print("len replay_memory,",len(replay_memory))
+        print("type replay_memory,",type(replay_memory))
+
+
 
 
         # exit(0)
