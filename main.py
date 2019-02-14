@@ -75,7 +75,7 @@ class Parameters:
 original = False
 
 
-def add_experience(state, action, next_state, reward, done,args):
+def add_experience(state, action, next_state, reward, done, replay_memory, args):
     reward = utils.to_tensor(np.array([reward])).unsqueeze(0)
     if args.is_cuda: reward = reward.cuda()
     if args.use_done_mask:
@@ -87,8 +87,8 @@ def add_experience(state, action, next_state, reward, done,args):
     # replay_queue.put((state, action, next_state, reward, done))
     # print("before put")
 
-    return state, action, next_state, reward, done
-    # replay_buffer.put_nowait((state, action, next_state, reward, done))
+    # return state, action, next_state, reward, done
+    replay_memory.append((state, action, next_state, reward, done))
 
 
 def evaluate(net, args, replay_memory, dict_all_returns, key, store_transition=True):
@@ -153,7 +153,7 @@ class Agent:
         # self.replay_queue = mp.Queue()
         # self.replay_memory = mp.Manager().list()
         # self.replay_memory = mp.Array()
-        self.replay_memory = mp.Queue()
+        # self.replay_memory = mp.Queue()
 
 
 
@@ -163,7 +163,7 @@ class Agent:
         #     self.replay_memory[key] = replay_memory.ReplayMemory(self.args.buffer_size)
 
         self.learner = LearnerThread(self.replay_memory, self.rl_agent)
-        self.learner.start()
+        # self.learner.start()
         # Stats
         # self.timers = {
         #     k: TimerStat()
@@ -210,6 +210,11 @@ class Agent:
 
         # exit(0)
         print("finished EA,time:", (time.time()-time_start))
+
+
+        print("replay_memory[0]", replay_memory[0])
+
+
         # exit(0)
 
 
@@ -238,12 +243,12 @@ class Agent:
 
         print(all_fitness)
         print("self.num_frames ", self.num_frames)
-        print("steps", self.learner.steps)
+        # print("steps", self.learner.steps)
         time.sleep(100)
 
         print(replay_memory.qsize())
-        print(type(self.replay_memory))
-        print(self.replay_memory.get())
+        # print(type(self.replay_memory))
+        # print(self.replay_memory.get())
         # print(random.sample(list(self.replay_memory), 10))
 
 
@@ -282,7 +287,7 @@ class Agent:
         # test_score = sum(test_fitness)/5.0
         # print("test_score,",test_score)
         print("test_return,",test_return)
-        # exit(0)
+        exit(0)
         test_score = sum(list(test_return.values()[0])) / 5.0
 
         # NeuroEvolution's probabilistic selection and recombination step
@@ -429,7 +434,7 @@ if __name__ == "__main__":
     #Create Agent
     # ray.init()
     # print(torch.cuda.device_count())
-    replay_memory = mp.Queue()
+    replay_memory = mp.Manager.list()
 
     agent = Agent(parameters, env)
     print('Running', env_tag, ' State_dim:', parameters.state_dim, ' Action_dim:', parameters.action_dim)
