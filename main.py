@@ -212,7 +212,7 @@ class Agent:
         print("finished EA,time:", (time.time()-time_start))
 
 
-        print("replay_memory[0]", replay_memory[0])
+        print("replay_memory", replay_memory)
 
 
         # exit(0)
